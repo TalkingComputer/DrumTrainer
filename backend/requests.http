@@ -1,0 +1,28 @@
+@baseUrl = http://localhost:8000/api
+@playerId = 24292193-b08c-4516-9985-388f30f2687e
+
+### Spieler anlegen
+POST {{baseUrl}}/players
+Content-Type: application/json
+
+{ "name": "Athene" }
+
+### Eigenes Profil
+GET {{baseUrl}}/players/me
+X-Player-Id: {{playerId}}
+
+### Namen ändern
+PATCH {{baseUrl}}/players/me
+Content-Type: application/json
+X-Player-Id: {{playerId}}
+
+{ "name": "Athene Drums" }
+
+### Fehlerfall: kein Header → 401
+GET {{baseUrl}}/players/me
+
+### Fehlerfall: leerer Name → 400
+POST {{baseUrl}}/players
+Content-Type: application/json
+
+{ "name": "   " }
