@@ -1,0 +1,30 @@
+@baseUrl = http://localhost:8000/api
+@playerId = 33751846-6162-4b79-9209-57f25a265338
+
+
+
+
+### Fehlerfall: leerer Name → 400
+POST {{baseUrl}}/players
+Content-Type: application/json
+
+{ "name": "   " }
+
+
+
+
+
+
+
+### Fehler: Teildauern länger als Gesamtdauer → 400
+POST {{baseUrl}}/players/me/sessions
+Content-Type: application/json
+X-Player-Id: {{playerId}}
+
+{
+  "date": "2026-11-16T18:30:00Z",
+  "durationSeconds": 100,
+  "playedRudiments": [
+    { "rudimentId": "flam", "bpm": 100, "durationSeconds": 500 }
+  ]
+}
