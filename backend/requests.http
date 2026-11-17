@@ -160,3 +160,22 @@ X-Player-Id: {{playerId}}
 ### Fehler: unbekanntes Rudiment → 400
 GET {{baseUrl}}/players/me/leaderboard?metric=bpm&rudimentId=gibt-es-nicht
 X-Player-Id: {{playerId}}
+
+### ------------------------------------------------------------
+### Gegenseitige Freundschaft: Gegenrichtung prüfen
+### Voraussetzung: Spieler 1 hat Spieler 2 hinzugefügt (siehe oben)
+### ------------------------------------------------------------
+
+### Fehler: Spieler 2 fügt Spieler 1 hinzu, obwohl die Freundschaft schon besteht → 409
+POST {{baseUrl}}/players/me/friends
+Content-Type: application/json
+X-Player-Id: {{player2Id}}
+
+{ "friendCode": "{{playerCode}}" }
+
+### Leaderboard aus Sicht von Spieler 2: Spieler 1 muss auftauchen
+GET {{baseUrl}}/players/me/leaderboard?metric=duration
+X-Player-Id: {{player2Id}}
+
+### Rudimente: jetzt mit pattern und beamGroup
+GET {{baseUrl}}/rudiments

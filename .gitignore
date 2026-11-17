@@ -1,0 +1,3 @@
+# Laufzeitdaten des Backends (Spieler, Sessions, Freundschaften).
+# Die festen Startdaten liegen in backend/seed/ und gehören ins Repository.
+# backend/data/

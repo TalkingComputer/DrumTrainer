@@ -4,6 +4,18 @@ import { HTTPException } from "@hono/hono/http-exception";
 import health from "./routes/health.ts";
 import players from "./routes/players.ts";
 import rudiments from "./routes/rudiments.ts";
+import { validateRudiments } from "./services/rudimentService.ts";
+
+// Vor dem Start: Startliste der Rudimente prüfen.
+// Ein kaputtes Pattern soll sofort auffallen, nicht erst im Browser.
+const rudimentErrors = validateRudiments();
+if (rudimentErrors.length > 0) {
+  console.error("Fehler in backend/seed/rudiments.json:");
+  for (const error of rudimentErrors) {
+    console.error("  - " + error);
+  }
+  Deno.exit(1);
+}
 
 const app = new Hono();
 
