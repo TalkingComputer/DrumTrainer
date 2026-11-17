@@ -54,18 +54,18 @@ export async function addFriend(player: Player, friendCode: string): Promise<Pub
 
   // Regel 1: Den Code muss es geben
   if (friend === undefined) {
-    throw new HTTPException(404, { message: "Kein Spieler mit diesem Freundescode" });
+    throw new HTTPException(404, { message: "No player with this friend code" });
   }
 
   // Regel 2: Sich selbst hinzufügen geht nicht
   if (friend.id === player.id) {
-    throw new HTTPException(409, { message: "Du kannst dich nicht selbst hinzufügen" });
+    throw new HTTPException(409, { message: "You cannot add yourself" });
   }
 
   // Regel 3: Keine doppelte Freundschaft, egal wer zuerst hinzugefügt hat
   const existing = await findFriendship(player.id, friend.id);
   if (existing !== undefined) {
-    throw new HTTPException(409, { message: "Ihr seid bereits befreundet" });
+    throw new HTTPException(409, { message: "You are already friends" });
   }
 
   const newFriendship: Friendship = {
@@ -82,12 +82,12 @@ export async function removeFriend(player: Player, friendCode: string): Promise<
   const friend = await getPlayerByFriendCode(friendCode);
 
   if (friend === undefined) {
-    throw new HTTPException(404, { message: "Kein Spieler mit diesem Freundescode" });
+    throw new HTTPException(404, { message: "No player with this friend code" });
   }
 
   const existing = await findFriendship(player.id, friend.id);
   if (existing === undefined) {
-    throw new HTTPException(404, { message: "Dieser Spieler ist nicht in deiner Freundesliste" });
+    throw new HTTPException(404, { message: "This player is not in your friend list" });
   }
 
   await deleteFriendship(player.id, friend.id);

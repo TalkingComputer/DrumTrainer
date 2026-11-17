@@ -1,9 +1,9 @@
 @baseUrl = http://localhost:8000/api
-@playerId = ba218b32-6337-40f2-bd40-af4b0762a888
+@playerId = 26a485c3-5c55-47a9-822f-a29057ab85b3
 
 
-@playerId = 71c93160-73ea-45de-b0c9-d934a2b090cc
-@playerCode = DRUM-5104
+@playerId = 26a485c3-5c55-47a9-822f-a29057ab85b3
+@playerCode = DRUM-9759
 @player2Id = 6a1371bc-e435-4d39-91bf-bf51191e8d9e
 @player2Code = DRUM-8784
 
@@ -42,14 +42,14 @@ GET {{baseUrl}}/rudiments
 ### Session anlegen
 POST {{baseUrl}}/players/me/sessions
 Content-Type: application/json
-X-Player-Id: {{player2Id}}
+X-Player-Id: {{playerId}}
 
 {
-  "date": "2026-11-16T15:30:00Z",
+  "date": "2026-11-17T13:30:00Z",
   "durationSeconds": 900,
   "playedRudiments": [
-    { "rudimentId": "single-stroke-roll", "bpm": 140, "durationSeconds": 300 },
-    { "rudimentId": "single-paradiddle", "bpm": 106, "durationSeconds": 400 }
+    { "rudimentId": "double-paradiddle", "bpm": 134, "durationSeconds": 84 },
+    { "rudimentId": "paradiddle-diddle", "bpm": 148, "durationSeconds": 48 }
   ]
 }
 
@@ -179,3 +179,43 @@ X-Player-Id: {{player2Id}}
 
 ### Rudimente: jetzt mit pattern und beamGroup
 GET {{baseUrl}}/rudiments
+
+
+### ------------------------------------------------------------
+### Einzelne Session abrufen und ändern (id einer eigenen Session einsetzen)
+### ------------------------------------------------------------
+@sessionId = HIER-SESSION-ID
+
+### Eine Session abrufen
+GET {{baseUrl}}/players/me/sessions/{{sessionId}}
+X-Player-Id: {{playerId}}
+
+### Session ändern (kompletter Body wie bei POST)
+PATCH {{baseUrl}}/players/me/sessions/{{sessionId}}
+Content-Type: application/json
+X-Player-Id: {{playerId}}
+
+{
+  "date": "2026-11-16T18:30:00Z",
+  "durationSeconds": 1200,
+  "playedRudiments": [
+    { "rudimentId": "single-paradiddle", "bpm": 110, "durationSeconds": 900 }
+  ]
+}
+
+### Fehler: fremde Session abrufen → 404
+GET {{baseUrl}}/players/me/sessions/{{sessionId}}
+X-Player-Id: {{player2Id}}
+
+### Fehler: Regel verletzt (Teildauer zu lang) → 400
+PATCH {{baseUrl}}/players/me/sessions/{{sessionId}}
+Content-Type: application/json
+X-Player-Id: {{playerId}}
+
+{
+  "date": "2026-11-16T18:30:00Z",
+  "durationSeconds": 60,
+  "playedRudiments": [
+    { "rudimentId": "single-paradiddle", "bpm": 110, "durationSeconds": 900 }
+  ]
+}

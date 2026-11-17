@@ -9,6 +9,16 @@
       "id": "6a1371bc-e435-4d39-91bf-bf51191e8d9e",
       "friendCode": "DRUM-8784",
       "name": "Spieler 2"
+    },
+    {
+      "id": "d231daa6-f351-4f67-a5d8-177002498874",
+      "friendCode": "DRUM-8931",
+      "name": "Vincekronos"
+    },
+    {
+      "id": "26a485c3-5c55-47a9-822f-a29057ab85b3",
+      "friendCode": "DRUM-9759",
+      "name": "Firefox"
     }
   ],
   "rudiments": [],
@@ -48,12 +58,114 @@
           "durationSeconds": 400
         }
       ]
+    },
+    {
+      "id": "21424357-142b-482c-9cf1-8eaf3b8c2620",
+      "playerId": "6a1371bc-e435-4d39-91bf-bf51191e8d9e",
+      "date": "2026-11-16T15:30:00.000Z",
+      "durationSeconds": 900,
+      "playedRudiments": [
+        {
+          "rudimentId": "flam-tap",
+          "bpm": 152,
+          "durationSeconds": 160
+        },
+        {
+          "rudimentId": "paradiddle-diddle",
+          "bpm": 143,
+          "durationSeconds": 80
+        }
+      ]
+    },
+    {
+      "id": "62093e56-d0bd-42a5-a21e-badc5390574b",
+      "playerId": "6a1371bc-e435-4d39-91bf-bf51191e8d9e",
+      "date": "2026-11-17T13:30:00.000Z",
+      "durationSeconds": 900,
+      "playedRudiments": [
+        {
+          "rudimentId": "single-stroke-four",
+          "bpm": 135,
+          "durationSeconds": 124
+        },
+        {
+          "rudimentId": "single-paradiddle",
+          "bpm": 165,
+          "durationSeconds": 134
+        }
+      ]
+    },
+    {
+      "id": "28306062-8ee3-4314-9abe-d4bfc21a874a",
+      "playerId": "26a485c3-5c55-47a9-822f-a29057ab85b3",
+      "date": "2026-11-17T13:30:00.000Z",
+      "durationSeconds": 900,
+      "playedRudiments": [
+        {
+          "rudimentId": "single-stroke-four",
+          "bpm": 135,
+          "durationSeconds": 124
+        },
+        {
+          "rudimentId": "single-paradiddle",
+          "bpm": 165,
+          "durationSeconds": 134
+        }
+      ]
+    },
+    {
+      "id": "f4d23bc3-95c9-4303-86a6-de28038bfef1",
+      "playerId": "26a485c3-5c55-47a9-822f-a29057ab85b3",
+      "date": "2026-11-17T13:30:00.000Z",
+      "durationSeconds": 900,
+      "playedRudiments": [
+        {
+          "rudimentId": "double-paradiddle",
+          "bpm": 134,
+          "durationSeconds": 84
+        },
+        {
+          "rudimentId": "paradiddle-diddle",
+          "bpm": 148,
+          "durationSeconds": 48
+        }
+      ]
+    },
+    {
+      "id": "35201318-f63a-4fd7-86fb-0914d2860479",
+      "playerId": "26a485c3-5c55-47a9-822f-a29057ab85b3",
+      "date": "2026-11-17T14:32:00.000Z",
+      "durationSeconds": 131,
+      "playedRudiments": [
+        {
+          "rudimentId": "nine-stroke-roll",
+          "bpm": 169,
+          "durationSeconds": 73
+        },
+        {
+          "rudimentId": "single-stroke-roll",
+          "bpm": 189,
+          "durationSeconds": 58
+        }
+      ]
     }
   ],
   "friendships": [
     {
       "playerId": "71c93160-73ea-45de-b0c9-d934a2b090cc",
       "friendId": "6a1371bc-e435-4d39-91bf-bf51191e8d9e"
+    },
+    {
+      "playerId": "26a485c3-5c55-47a9-822f-a29057ab85b3",
+      "friendId": "6a1371bc-e435-4d39-91bf-bf51191e8d9e"
+    },
+    {
+      "playerId": "26a485c3-5c55-47a9-822f-a29057ab85b3",
+      "friendId": "71c93160-73ea-45de-b0c9-d934a2b090cc"
+    },
+    {
+      "playerId": "26a485c3-5c55-47a9-822f-a29057ab85b3",
+      "friendId": "d231daa6-f351-4f67-a5d8-177002498874"
     }
   ]
 }

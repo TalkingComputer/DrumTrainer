@@ -1,0 +1,74 @@
+[
+  {
+    "id": "single-stroke-roll",
+    "name": "Single Stroke Roll",
+    "pattern": "16R 16L 16R 16L 16R 16L 16R 16L"
+  },
+  {
+    "id": "single-stroke-four",
+    "name": "Single Stroke Four",
+    "pattern": "(3 16R/L 16L/R 16R/L) 8L/R (3 16R/L 16L/R 16R/L) 8L/R"
+  },
+  {
+    "id": "single-stroke-seven",
+    "name": "Single Stroke Seven",
+    "pattern": "(6 16R 16L 16R 16L 16R 16L) 4R>"
+  },
+  {
+    "id": "double-stroke-roll",
+    "name": "Double Stroke Open Roll",
+    "pattern": "16R 16R 16L 16L 16R 16R 16L 16L"
+  },
+  {
+    "id": "five-stroke-roll",
+    "name": "Five Stroke Roll",
+    "pattern": "8RR: 8LL: 4R>"
+  },
+  {
+    "id": "single-paradiddle",
+    "name": "Single Paradiddle",
+    "pattern": "16R> 16L 16R 16R 16L> 16R 16L 16L"
+  },
+  {
+    "id": "double-paradiddle",
+    "name": "Double Paradiddle",
+    "pattern": "16R> 16L 16R 16L 16R 16R 16L> 16R 16L 16R 16L 16L",
+    "beamGroup": 1.5
+  },
+  {
+    "id": "paradiddle-diddle",
+    "name": "Paradiddle-Diddle",
+    "pattern": "16R> 16L 16R 16R 16L 16L 16L> 16R 16L 16L 16R 16R",
+    "beamGroup": 1.5
+  },
+  {
+    "id": "flam",
+    "name": "Flam",
+    "pattern": "4fR 4fL"
+  },
+  {
+    "id": "flam-accent",
+    "name": "Flam Accent",
+    "pattern": "(3 8fR> 8L 8R) (3 8fL> 8R 8L)"
+  },
+  {
+    "id": "flam-tap",
+    "name": "Flam Tap",
+    "pattern": "16fR> 16R 16fL> 16L 16fR> 16R 16fL> 16L"
+  },
+  {
+    "id": "drag",
+    "name": "Drag",
+    "pattern": "4dR 4dL"
+  },
+  {
+    "id": "single-drag-tap",
+    "name": "Single Drag Tap",
+    "pattern": "8dR 8L> 8dL 8R>"
+  },
+  {
+    "id": "multiple-bounce-roll",
+    "name": "Multiple Bounce Roll",
+    "pattern": "8Rz 8Lz 8Rz 8Lz"
+  }
+]

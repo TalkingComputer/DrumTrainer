@@ -14,11 +14,11 @@ function normalizeFriendCode(code: string): string {
 // Prüft die Form des Bodys und gibt den Freundescode zurück
 function checkFriendBody(body: any): string {
   if (body === null || typeof body !== "object") {
-    throw new HTTPException(400, { message: "Body muss ein JSON-Objekt sein" });
+    throw new HTTPException(400, { message: "Body must be a JSON object" });
   }
 
   if (typeof body.friendCode !== "string" || body.friendCode.trim().length === 0) {
-    throw new HTTPException(400, { message: "Feld 'friendCode' fehlt oder ist leer" });
+    throw new HTTPException(400, { message: "Field 'friendCode' is missing or empty" });
   }
 
   return normalizeFriendCode(body.friendCode);

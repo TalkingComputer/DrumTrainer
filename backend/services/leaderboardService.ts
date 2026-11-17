@@ -82,7 +82,7 @@ export async function getLeaderboard(
   if (query.rudimentId !== undefined) {
     const rudiment = getRudimentById(query.rudimentId);
     if (rudiment === undefined) {
-      throw new HTTPException(400, { message: "Unbekanntes Rudiment: " + query.rudimentId });
+      throw new HTTPException(400, { message: "Unknown rudiment: " + query.rudimentId });
     }
   }
 

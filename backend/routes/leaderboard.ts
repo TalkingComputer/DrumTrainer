@@ -13,14 +13,14 @@ function checkLeaderboardQuery(
 ): LeaderboardQuery {
   // metric: Pflicht, nur zwei Werte erlaubt
   if (metricParam !== "bpm" && metricParam !== "duration") {
-    throw new HTTPException(400, { message: "Parameter 'metric' muss 'bpm' oder 'duration' sein" });
+    throw new HTTPException(400, { message: "Parameter 'metric' must be 'bpm' or 'duration'" });
   }
 
   // period: optional, Standard ist "all"
   let period: Period = "all";
   if (periodParam !== undefined) {
     if (periodParam !== "week" && periodParam !== "month" && periodParam !== "all") {
-      throw new HTTPException(400, { message: "Parameter 'period' muss 'week', 'month' oder 'all' sein" });
+      throw new HTTPException(400, { message: "Parameter 'period' must be 'week', 'month' or 'all'" });
     }
     period = periodParam;
   }
@@ -33,7 +33,7 @@ function checkLeaderboardQuery(
 
   // Bei bpm ist rudimentId Pflicht
   if (metricParam === "bpm" && rudimentId === undefined) {
-    throw new HTTPException(400, { message: "Für metric=bpm ist der Parameter 'rudimentId' nötig" });
+    throw new HTTPException(400, { message: "Parameter 'rudimentId' is required for metric=bpm" });
   }
 
   return {

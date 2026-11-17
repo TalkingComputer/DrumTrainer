@@ -25,29 +25,29 @@ export function validateRudiments(): string[] {
 
     // id muss vorhanden und eindeutig sein
     if (typeof rudiment.id !== "string" || rudiment.id.trim() === "") {
-      errors.push("Ein Rudiment hat keine id");
+      errors.push("A rudiment has no id");
       continue;
     }
     if (seenIds.includes(rudiment.id)) {
-      errors.push(label + ": id kommt doppelt vor");
+      errors.push(label + ": duplicate id");
     }
     seenIds.push(rudiment.id);
 
     // name muss vorhanden sein
     if (typeof rudiment.name !== "string" || rudiment.name.trim() === "") {
-      errors.push(label + ": name fehlt");
+      errors.push(label + ": name is missing");
     }
 
     // beamGroup ist optional, aber wenn vorhanden eine Zahl größer 0
     if (rudiment.beamGroup !== undefined) {
       if (typeof rudiment.beamGroup !== "number" || rudiment.beamGroup <= 0) {
-        errors.push(label + ": beamGroup muss eine Zahl größer 0 sein");
+        errors.push(label + ": beamGroup must be a number greater than 0");
       }
     }
 
     // pattern muss sich fehlerfrei einlesen lassen
     if (typeof rudiment.pattern !== "string" || rudiment.pattern.trim() === "") {
-      errors.push(label + ": pattern fehlt");
+      errors.push(label + ": pattern is missing");
       continue;
     }
     const result = parsePattern(rudiment.pattern);

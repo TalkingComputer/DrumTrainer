@@ -35,6 +35,19 @@ export async function insertSession(newSession: Session): Promise<void> {
   await writeDb(db);
 }
 
+// Bestehende Session ersetzen (gleiche id) und speichern
+export async function updateSessionRecord(changedSession: Session): Promise<void> {
+  const db = await readDb();
+
+  for (let i = 0; i < db.sessions.length; i++) {
+    if (db.sessions[i].id === changedSession.id) {
+      db.sessions[i] = changedSession;
+    }
+  }
+
+  await writeDb(db);
+}
+
 // Session löschen: alle Sessions außer der gesuchten behalten
 export async function deleteSessionById(sessionId: string): Promise<void> {
   const db = await readDb();

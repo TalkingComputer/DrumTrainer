@@ -6,6 +6,6 @@ export async function readBody(request: Request): Promise<any> {
     const body = await request.json();
     return body;
   } catch {
-    throw new HTTPException(400, { message: "Ungültiges JSON" });
+    throw new HTTPException(400, { message: "Invalid JSON" });
   }
 }

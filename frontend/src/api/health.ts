@@ -1,12 +1,11 @@
-const API_URL = 'http://localhost:8000/api'
+import { apiRequest } from './client'
 
 export interface HealthResponse {
   status: string
   timestamp: string
 }
 
-export async function getHealth(): Promise<HealthResponse> {
-  const res = await fetch(`${API_URL}/health`)
-  if (!res.ok) throw new Error(`Backend antwortet mit ${res.status}`)
-  return res.json()
+// GET /api/health
+export function getHealth(): Promise<HealthResponse> {
+  return apiRequest<HealthResponse>('GET', '/health')
 }

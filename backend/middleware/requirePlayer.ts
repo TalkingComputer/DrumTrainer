@@ -10,7 +10,7 @@ export const requirePlayer = createMiddleware<AppEnv>(async (c, next) => {
 
   // 2. Kein Header? Abbruch mit 401
   if (id === undefined) {
-    throw new HTTPException(401, { message: "Header X-Player-Id fehlt" });
+    throw new HTTPException(401, { message: "Header X-Player-Id is missing" });
   }
 
   // 3. Spieler zu dieser id suchen
@@ -18,7 +18,7 @@ export const requirePlayer = createMiddleware<AppEnv>(async (c, next) => {
 
   // 4. Keinen gefunden? Abbruch mit 401
   if (player === undefined) {
-    throw new HTTPException(401, { message: "Unbekannter Spieler" });
+    throw new HTTPException(401, { message: "Unknown player" });
   }
 
   // 5. Spieler im Context ablegen, damit die Route ihn nutzen kann

@@ -10,7 +10,7 @@ import { validateRudiments } from "./services/rudimentService.ts";
 // Ein kaputtes Pattern soll sofort auffallen, nicht erst im Browser.
 const rudimentErrors = validateRudiments();
 if (rudimentErrors.length > 0) {
-  console.error("Fehler in backend/seed/rudiments.json:");
+  console.error("Invalid entries in backend/seed/rudiments.json:");
   for (const error of rudimentErrors) {
     console.error("  - " + error);
   }
@@ -37,9 +37,9 @@ app.onError((err, c) => {
     return c.json({ error: err.message }, err.status);
   }
   console.error(err);
-  return c.json({ error: "Interner Serverfehler" }, 500);
+  return c.json({ error: "Internal server error" }, 500);
 });
 
-app.notFound((c) => c.json({ error: "Route nicht gefunden" }, 404));
+app.notFound((c) => c.json({ error: "Route not found" }, 404));
 
 Deno.serve({ port: 8000 }, app.fetch);

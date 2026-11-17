@@ -16,21 +16,21 @@ const players = new Hono<AppEnv>();
 // "any" heißt: TypeScript prüft hier nichts, wir prüfen selbst.
 function checkName(body: any): string {
   if (body === null || typeof body !== "object") {
-    throw new HTTPException(400, { message: "Body muss ein JSON-Objekt sein" });
+    throw new HTTPException(400, { message: "Body must be a JSON object" });
   }
 
   if (typeof body.name !== "string") {
-    throw new HTTPException(400, { message: "Feld 'name' fehlt oder ist kein Text" });
+    throw new HTTPException(400, { message: "Field 'name' is missing or not a string" });
   }
 
   const name = body.name.trim();
 
   if (name.length < 1) {
-    throw new HTTPException(400, { message: "Name darf nicht leer sein" });
+    throw new HTTPException(400, { message: "Name must not be empty" });
   }
 
   if (name.length > 30) {
-    throw new HTTPException(400, { message: "Name darf höchstens 30 Zeichen lang sein" });
+    throw new HTTPException(400, { message: "Name must be at most 30 characters long" });
   }
 
   return name;

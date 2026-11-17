@@ -1,0 +1,186 @@
+/*
+  Theme der App.
+  Bootstrap 5.3 steuert seine Farben über CSS-Variablen (--bs-...).
+  Diese Datei überschreibt sie mit den Farben aus Figma. Sass ist dafür nicht nötig.
+  Die Datei lädt in main.ts NACH Bootstrap, deshalb gewinnen diese Werte.
+*/
+
+/* ---------- 1. Eigene Design-Tokens aus Figma ---------- */
+:root {
+  /* Farben (Figma-Variablen color/*) */
+  --dt-bg: #161616;
+  --dt-surface: #1e1e1e;
+  --dt-surface-2: #272727;
+  --dt-surface-3: #323232;
+  --dt-border: #3a3a3a;
+  --dt-text: #ffffff;
+  --dt-text-muted: #a3a3a3;
+  --dt-text-subtle: #616161;
+  --dt-accent: #ffd900;
+  --dt-accent-hover: #ffe44d;
+  --dt-on-accent: #000000;
+
+  /* Schriftgrößen (Figma-Textstile).
+     Figma ist für eine große Leinwand angelegt, hier etwa um den Faktor 1,5 verkleinert. */
+  /* Die BPM-Zahl richtet sich nach Breite UND Höhe des Fensters (der kleinere Wert gewinnt) */
+  --dt-font-display: clamp(4rem, min(14vw, 16vh), 8rem); /* Display/BPM */
+  --dt-font-h1: 2rem; /* Heading/H1 */
+  --dt-font-h2: 1.5rem; /* Heading/H2 */
+  --dt-font-body-l: 1.25rem; /* Body/L */
+  --dt-font-body: 1rem; /* Body/M, Label/M */
+  --dt-font-caption: 0.875rem; /* Caption */
+
+  /* Radien (Figma: Dialog 32, Karten 16-24, Buttons 16-24) */
+  --dt-radius-dialog: 2rem;
+  --dt-radius-card: 1.25rem;
+  --dt-radius-button: 1rem;
+}
+
+/* ---------- 2. Bootstrap-Variablen überschreiben ---------- */
+/* index.html setzt data-bs-theme="dark". Bootstrap definiert seine
+   Dark-Mode-Farben unter genau diesem Selektor, also überschreiben wir sie dort. */
+:root,
+[data-bs-theme='dark'] {
+  --bs-body-bg: var(--dt-bg);
+  --bs-body-color: var(--dt-text);
+  --bs-body-font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  --bs-secondary-color: var(--dt-text-muted);
+  --bs-tertiary-color: var(--dt-text-subtle);
+  --bs-secondary-bg: var(--dt-surface-2);
+  --bs-tertiary-bg: var(--dt-surface);
+  --bs-border-color: var(--dt-border);
+  --bs-emphasis-color: var(--dt-text);
+
+  --bs-primary: var(--dt-accent);
+  --bs-primary-rgb: 255, 217, 0;
+  --bs-link-color: var(--dt-accent);
+  --bs-link-color-rgb: 255, 217, 0;
+  --bs-link-hover-color: var(--dt-accent-hover);
+  --bs-link-hover-color-rgb: 255, 228, 77;
+
+  --bs-focus-ring-color: rgba(255, 217, 0, 0.4);
+  --bs-border-radius: 0.75rem;
+  --bs-border-radius-lg: var(--dt-radius-button);
+}
+
+/* Bootstrap legt die Button-Farben beim Bauen fest, nicht über --bs-primary.
+   Darum braucht .btn-primary eigene Werte. */
+.btn-primary {
+  --bs-btn-color: var(--dt-on-accent);
+  --bs-btn-bg: var(--dt-accent);
+  --bs-btn-border-color: var(--dt-accent);
+  --bs-btn-hover-color: var(--dt-on-accent);
+  --bs-btn-hover-bg: var(--dt-accent-hover);
+  --bs-btn-hover-border-color: var(--dt-accent-hover);
+  --bs-btn-active-color: var(--dt-on-accent);
+  --bs-btn-active-bg: var(--dt-accent);
+  --bs-btn-active-border-color: var(--dt-accent);
+  --bs-btn-disabled-color: var(--dt-on-accent);
+  --bs-btn-disabled-bg: var(--dt-accent);
+  --bs-btn-disabled-border-color: var(--dt-accent);
+  --bs-btn-focus-shadow-rgb: 255, 217, 0;
+  font-weight: 600;
+}
+
+/* Zweitrangige Buttons (Cancel, Discard): graue Fläche */
+.btn-secondary {
+  --bs-btn-color: var(--dt-text);
+  --bs-btn-bg: var(--dt-surface-3);
+  --bs-btn-border-color: var(--dt-surface-3);
+  --bs-btn-hover-color: var(--dt-text);
+  --bs-btn-hover-bg: var(--dt-border);
+  --bs-btn-hover-border-color: var(--dt-border);
+  --bs-btn-active-color: var(--dt-text);
+  --bs-btn-active-bg: var(--dt-border);
+  --bs-btn-active-border-color: var(--dt-border);
+  --bs-btn-disabled-color: var(--dt-text);
+  --bs-btn-disabled-bg: var(--dt-surface-3);
+  --bs-btn-disabled-border-color: var(--dt-surface-3);
+  font-weight: 600;
+}
+
+/* Umrandete Buttons (+ Add rudiment): nur Rahmen, beim Hover graue Fläche */
+.btn-outline-secondary {
+  --bs-btn-color: var(--dt-text);
+  --bs-btn-border-color: var(--dt-border);
+  --bs-btn-hover-color: var(--dt-text);
+  --bs-btn-hover-bg: var(--dt-surface-2);
+  --bs-btn-hover-border-color: var(--dt-border);
+  --bs-btn-active-color: var(--dt-text);
+  --bs-btn-active-bg: var(--dt-surface-3);
+  --bs-btn-active-border-color: var(--dt-border);
+}
+
+/* Beschriftung über Formularfeldern: klein, grau, Großbuchstaben (Figma "Caption") */
+.field-label {
+  font-size: var(--dt-font-caption);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--dt-text-muted);
+}
+
+/* Eingabefelder: dunkle Fläche, gelber Rahmen beim Fokus */
+.form-control,
+.form-select {
+  background-color: var(--dt-surface-2);
+  border-color: var(--dt-border);
+  color: var(--dt-text);
+}
+.form-control::placeholder {
+  color: var(--dt-text-subtle);
+}
+.form-control:focus,
+.form-select:focus {
+  background-color: var(--dt-surface-2);
+  border-color: var(--dt-accent);
+  color: var(--dt-text);
+  box-shadow: 0 0 0 0.25rem rgba(255, 217, 0, 0.25);
+}
+
+/* ---------- 3. Grundlayout ---------- */
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  font-size: var(--dt-font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+.h1 {
+  font-size: var(--dt-font-h1);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+h2,
+.h2 {
+  font-size: var(--dt-font-h2);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+/* Während ein Wert per Ziehen geändert wird (siehe useDragAdjust.ts) */
+body.is-drag-adjusting {
+  user-select: none;
+  cursor: ns-resize;
+}
+
+/* Elemente, deren Wert sich per Ziehen ändern lässt.
+   touch-action: none verhindert, dass der Finger stattdessen die Seite scrollt. */
+.drag-adjustable {
+  touch-action: none;
+  cursor: ns-resize;
+}
+
+/* Solange ein Dialog offen ist, scrollt die Seite dahinter nicht mit (siehe AppDialog.vue) */
+body.dialog-open {
+  overflow: hidden;
+}
+
+.text-caption {
+  font-size: var(--dt-font-caption);
+}

@@ -6,6 +6,7 @@ import {
   findSessionById,
   findSessionsByPlayerId,
   insertSession,
+  updateSessionRecord,
 } from "../repositories/sessionRepository.ts";
 
 const MIN_BPM = 20;
@@ -19,13 +20,13 @@ function checkSessionRules(input: SessionInput): void {
     // Regel 1: Das Rudiment muss existieren
     const rudiment = getRudimentById(played.rudimentId);
     if (rudiment === undefined) {
-      throw new HTTPException(400, { message: "Unbekanntes Rudiment: " + played.rudimentId });
+      throw new HTTPException(400, { message: "Unknown rudiment: " + played.rudimentId });
     }
 
     // Regel 2: BPM im sinnvollen Bereich
     if (played.bpm < MIN_BPM || played.bpm > MAX_BPM) {
       throw new HTTPException(400, {
-        message: "BPM muss zwischen " + MIN_BPM + " und " + MAX_BPM + " liegen",
+        message: "BPM must be between " + MIN_BPM + " and " + MAX_BPM,
       });
     }
 
@@ -35,7 +36,7 @@ function checkSessionRules(input: SessionInput): void {
   // Regel 3: Teildauern zusammen nicht länger als die ganze Session
   if (sumOfDurations > input.durationSeconds) {
     throw new HTTPException(400, {
-      message: "Die Rudimente dauern zusammen länger als die Session",
+      message: "The rudiments together last longer than the session",
     });
   }
 
@@ -43,7 +44,7 @@ function checkSessionRules(input: SessionInput): void {
   const sessionDate = new Date(input.date);
   const now = new Date();
   if (sessionDate > now) {
-    throw new HTTPException(400, { message: "Das Datum liegt in der Zukunft" });
+    throw new HTTPException(400, { message: "The date is in the future" });
   }
 }
 
@@ -75,16 +76,45 @@ export async function createSession(player: Player, input: SessionInput): Promis
   return newSession;
 }
 
-// Session löschen, aber nur die eigene
-export async function deleteSession(player: Player, sessionId: string): Promise<void> {
+// Eine einzelne Session holen, aber nur die eigene.
+// Abrufen, Ändern und Löschen nutzen diese Funktion für den Besitz-Check.
+export async function getOwnSession(player: Player, sessionId: string): Promise<Session> {
   const session = await findSessionById(sessionId);
 
   // Gibt es die Session nicht oder gehört sie jemand anderem: 404.
   // Beide Fälle sehen gleich aus. So verrät die API nicht,
   // ob eine fremde Session mit dieser id existiert.
   if (session === undefined || session.playerId !== player.id) {
-    throw new HTTPException(404, { message: "Session nicht gefunden" });
+    throw new HTTPException(404, { message: "Session not found" });
   }
 
+  return session;
+}
+
+// Bestehende Session ändern. Es gelten dieselben Regeln wie beim Anlegen.
+// id und playerId bleiben, alles andere kommt aus der Eingabe.
+export async function updateSession(
+  player: Player,
+  sessionId: string,
+  input: SessionInput,
+): Promise<Session> {
+  const existing = await getOwnSession(player, sessionId);
+  checkSessionRules(input);
+
+  const changedSession: Session = {
+    id: existing.id,
+    playerId: existing.playerId,
+    date: new Date(input.date).toISOString(),
+    durationSeconds: input.durationSeconds,
+    playedRudiments: input.playedRudiments,
+  };
+
+  await updateSessionRecord(changedSession);
+  return changedSession;
+}
+
+// Session löschen, aber nur die eigene
+export async function deleteSession(player: Player, sessionId: string): Promise<void> {
+  await getOwnSession(player, sessionId);
   await deleteSessionById(sessionId);
 }

@@ -1,9 +1,6 @@
 <script setup lang="ts"></script>
 
 <template>
-  <main class="container py-4">
-    <RouterView />
-  </main>
+  <!-- Hier setzt der Router die aktuelle View ein. Das Layout regelt jede View selbst. -->
+  <RouterView />
 </template>
-
-<style scoped></style>
