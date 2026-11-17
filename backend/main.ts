@@ -3,6 +3,7 @@ import { cors } from "@hono/hono/cors";
 import { HTTPException } from "@hono/hono/http-exception";
 import health from "./routes/health.ts";
 import players from "./routes/players.ts";
+import rudiments from "./routes/rudiments.ts";
 
 const app = new Hono();
 
@@ -16,6 +17,7 @@ app.use(
 
 app.route("/api/health", health);
 app.route("/api/players", players);
+app.route("/api/rudiments", rudiments);
 
 // Einheitliches Fehlerformat für alle Routen
 app.onError((err, c) => {

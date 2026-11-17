@@ -1,11 +1,18 @@
 @baseUrl = http://localhost:8000/api
-@playerId = 24292193-b08c-4516-9985-388f30f2687e
+@playerId = ba218b32-6337-40f2-bd40-af4b0762a888
+
+
+@playerId = 71c93160-73ea-45de-b0c9-d934a2b090cc
+@playerCode = DRUM-5104
+@player2Id = 6a1371bc-e435-4d39-91bf-bf51191e8d9e
+@player2Code = DRUM-8784
+
 
 ### Spieler anlegen
 POST {{baseUrl}}/players
 Content-Type: application/json
 
-{ "name": "Athene" }
+{ "name": "Spieler 2" }
 
 ### Eigenes Profil
 GET {{baseUrl}}/players/me
@@ -26,3 +33,130 @@ POST {{baseUrl}}/players
 Content-Type: application/json
 
 { "name": "   " }
+
+
+### Alle Rudimente
+GET {{baseUrl}}/rudiments
+
+
+### Session anlegen
+POST {{baseUrl}}/players/me/sessions
+Content-Type: application/json
+X-Player-Id: {{player2Id}}
+
+{
+  "date": "2026-11-16T15:30:00Z",
+  "durationSeconds": 900,
+  "playedRudiments": [
+    { "rudimentId": "single-stroke-roll", "bpm": 140, "durationSeconds": 300 },
+    { "rudimentId": "single-paradiddle", "bpm": 106, "durationSeconds": 400 }
+  ]
+}
+
+### Eigene Sessions abrufen
+GET {{baseUrl}}/players/me/sessions
+X-Player-Id: {{playerId}}
+
+### Session löschen (id aus der Antwort oben einsetzen)
+DELETE {{baseUrl}}/players/me/sessions/15eb36b7-c470-4b59-a81f-57ddcddd76eb
+X-Player-Id: {{playerId}}
+
+### Fehler: BPM zu hoch → 400
+POST {{baseUrl}}/players/me/sessions
+Content-Type: application/json
+X-Player-Id: {{playerId}}
+
+{
+  "date": "2026-11-16T18:30:00Z",
+  "durationSeconds": 300,
+  "playedRudiments": [
+    { "rudimentId": "flam", "bpm": 999, "durationSeconds": 100 }
+  ]
+}
+
+### Fehler: Teildauern länger als Gesamtdauer → 400
+POST {{baseUrl}}/players/me/sessions
+Content-Type: application/json
+X-Player-Id: {{playerId}}
+
+{
+  "date": "2026-11-16T18:30:00Z",
+  "durationSeconds": 100,
+  "playedRudiments": [
+    { "rudimentId": "flam", "bpm": 100, "durationSeconds": 500 }
+  ]
+}
+
+### Fehler: unbekanntes Rudiment → 400
+POST {{baseUrl}}/players/me/sessions
+Content-Type: application/json
+X-Player-Id: {{playerId}}
+
+{
+  "date": "2026-11-16T18:30:00Z",
+  "durationSeconds": 300,
+  "playedRudiments": [
+    { "rudimentId": "gibt-es-nicht", "bpm": 100, "durationSeconds": 100 }
+  ]
+}
+
+
+### Spieler 1 fügt Spieler 2 hinzu
+POST {{baseUrl}}/players/me/friends
+Content-Type: application/json
+X-Player-Id: {{playerId}}
+
+{ "friendCode": "{{player2Code}}" }
+
+### Freundesliste von Spieler 1
+GET {{baseUrl}}/players/me/friends
+X-Player-Id: {{playerId}}
+
+### Freundesliste von Spieler 2 (gegenseitig: Spieler 1 muss auftauchen)
+GET {{baseUrl}}/players/me/friends
+X-Player-Id: {{player2Id}}
+
+### Fehler: nochmal hinzufügen → 409
+POST {{baseUrl}}/players/me/friends
+Content-Type: application/json
+X-Player-Id: {{playerId}}
+
+{ "friendCode": "{{player2Code}}" }
+
+### Fehler: unbekannter Code → 404
+POST {{baseUrl}}/players/me/friends
+Content-Type: application/json
+X-Player-Id: {{playerId}}
+
+{ "friendCode": "DRUM-0000" }
+
+### Spieler 2 entfernt Spieler 1 (Code von Spieler 1 einsetzen)
+DELETE {{baseUrl}}/players/me/friends/DRUM-5104
+X-Player-Id: {{player2Id}}
+
+
+
+
+### Bestes Tempo Single Stroke Roll, alle Zeit
+GET {{baseUrl}}/players/me/leaderboard?metric=bpm&rudimentId=single-stroke-roll
+X-Player-Id: {{playerId}}
+
+### Gesamte Übezeit diese Woche
+GET {{baseUrl}}/players/me/leaderboard?metric=duration&period=week
+X-Player-Id: {{playerId}}
+
+### Übezeit nur für Paradiddle, letzter Monat
+GET {{baseUrl}}/players/me/leaderboard?metric=duration&rudimentId=single-paradiddle&period=month
+X-Player-Id: {{playerId}}
+
+### Fehler: metric fehlt → 400
+GET {{baseUrl}}/players/me/leaderboard
+X-Player-Id: {{playerId}}
+
+### Fehler: bpm ohne rudimentId → 400
+GET {{baseUrl}}/players/me/leaderboard?metric=bpm
+X-Player-Id: {{playerId}}
+
+### Fehler: unbekanntes Rudiment → 400
+GET {{baseUrl}}/players/me/leaderboard?metric=bpm&rudimentId=gibt-es-nicht
+X-Player-Id: {{playerId}}

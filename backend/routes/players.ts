@@ -3,6 +3,11 @@ import { HTTPException } from "@hono/hono/http-exception";
 import type { AppEnv } from "../types.ts";
 import { requirePlayer } from "../middleware/requirePlayer.ts";
 import { createPlayer, renamePlayer } from "../services/playerService.ts";
+import { readBody } from "../utils/readBody.ts";
+import sessions from "./sessions.ts";
+import friends from "./friends.ts";
+import leaderboard from "./leaderboard.ts";
+
 
 const players = new Hono<AppEnv>();
 
@@ -31,16 +36,6 @@ function checkName(body: any): string {
   return name;
 }
 
-// Liest den JSON-Body. Bei kaputtem JSON Abbruch mit 400.
-async function readBody(request: Request): Promise<any> {
-  try {
-    const body = await request.json();
-    return body;
-  } catch {
-    throw new HTTPException(400, { message: "Ungültiges JSON" });
-  }
-}
-
 // POST /api/players → neuen Spieler anlegen (ohne Header)
 players.post("/", async (c) => {
   const body = await readBody(c.req.raw);
@@ -52,6 +47,10 @@ players.post("/", async (c) => {
 // Ab hier läuft vor jeder Route der Türsteher
 players.use("/me", requirePlayer);
 players.use("/me/*", requirePlayer);
+players.route("/me/sessions", sessions);
+players.route("/me/friends", friends);
+players.route("/me/leaderboard", leaderboard);
+
 
 // GET /api/players/me → eigenes Profil
 players.get("/me", (c) => {

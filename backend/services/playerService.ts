@@ -56,3 +56,10 @@ export async function renamePlayer(player: Player, newName: string): Promise<Pla
   await updatePlayer(changedPlayer);
   return changedPlayer;
 }
+
+// Holt einen Spieler anhand seines Freundescodes
+export async function getPlayerByFriendCode(friendCode: string): Promise<Player | undefined> {
+  const player = await findPlayerByFriendCode(friendCode);
+  return player;
+}
+

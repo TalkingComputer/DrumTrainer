@@ -15,7 +15,6 @@ export async function readDb(): Promise<Database> {
     if (error instanceof Deno.errors.NotFound) {
       const emptyDb = {
         players: [],
-        rudiments: [],
         sessions: [],
         friendships: [],
       };

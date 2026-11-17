@@ -1,6 +1,59 @@
 {
-  "players": [],
+  "players": [
+    {
+      "id": "71c93160-73ea-45de-b0c9-d934a2b090cc",
+      "friendCode": "DRUM-5104",
+      "name": "Spieler 1"
+    },
+    {
+      "id": "6a1371bc-e435-4d39-91bf-bf51191e8d9e",
+      "friendCode": "DRUM-8784",
+      "name": "Spieler 2"
+    }
+  ],
   "rudiments": [],
-  "sessions": [],
-  "friendships": []
+  "sessions": [
+    {
+      "id": "7b61a031-a1b7-4b6b-8d57-ab857aba8f5f",
+      "playerId": "71c93160-73ea-45de-b0c9-d934a2b090cc",
+      "date": "2026-11-16T15:30:00.000Z",
+      "durationSeconds": 900,
+      "playedRudiments": [
+        {
+          "rudimentId": "single-stroke-roll",
+          "bpm": 125,
+          "durationSeconds": 300
+        },
+        {
+          "rudimentId": "single-paradiddle",
+          "bpm": 98,
+          "durationSeconds": 400
+        }
+      ]
+    },
+    {
+      "id": "bc5dd58f-c96d-40f6-83ad-d1816a2dc912",
+      "playerId": "6a1371bc-e435-4d39-91bf-bf51191e8d9e",
+      "date": "2026-11-16T15:30:00.000Z",
+      "durationSeconds": 900,
+      "playedRudiments": [
+        {
+          "rudimentId": "single-stroke-roll",
+          "bpm": 140,
+          "durationSeconds": 300
+        },
+        {
+          "rudimentId": "single-paradiddle",
+          "bpm": 106,
+          "durationSeconds": 400
+        }
+      ]
+    }
+  ],
+  "friendships": [
+    {
+      "playerId": "71c93160-73ea-45de-b0c9-d934a2b090cc",
+      "friendId": "6a1371bc-e435-4d39-91bf-bf51191e8d9e"
+    }
+  ]
 }
