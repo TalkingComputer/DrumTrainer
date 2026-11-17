@@ -3,8 +3,9 @@
 // - Der erste Klick auf Play startet die Session.
 // - Jede Kombination aus Rudiment und Tempo ist ein Abschnitt (PlayedRudiment).
 //   Wechselt das Rudiment oder das Tempo, endet der Abschnitt, und ein neuer beginnt.
-// - Ein Abschnitt zählt nur die Zeit, in der das Metronom wirklich läuft.
-//   Die Session-Zeit läuft dagegen ab dem ersten Play durch, auch in Pausen.
+// - Gezählt wird nur die Zeit, in der das Metronom wirklich läuft. Das gilt für jeden
+//   Abschnitt und für die Session-Zeit. In Pausen bleibt die Uhr oben rechts stehen.
+//   So wächst eine Session nicht weiter, wenn man vergisst, sie abzuschicken.
 //
 // Der Recorder beobachtet useMetronome per watch. Das Metronom selbst weiß nichts
 // vom Recorder. So bleiben beide Teile unabhängig.
@@ -44,7 +45,12 @@ export interface RecordedSession {
 
 // ---------- Gemeinsamer Zustand (wie bei useMetronome außerhalb der Funktion) ----------
 
+// Wann die Session begonnen hat. Nur für Datum und Startzeit im Formular.
 const sessionStartedAt = ref<number | null>(null)
+// Gespielte Zeit der ganzen Session, gleiche Technik wie bei den Abschnitten:
+// Summe der abgeschlossenen Play-Phasen plus die laufende Phase
+const sessionPlayedMs = ref(0)
+const sessionRunningSince = ref<number | null>(null)
 const closedSegments = ref<PlayedRudiment[]>([])
 const openSegment = ref<OpenSegment | null>(null)
 // Aktuelle Uhrzeit, jede Sekunde neu. Die Anzeige oben rechts rechnet damit.
@@ -61,6 +67,14 @@ function segmentMs(segment: OpenSegment, at: number): number {
     return segment.playedMs
   }
   return segment.playedMs + (at - segment.runningSince)
+}
+
+// Gespielte Zeit der ganzen Session bis zum Zeitpunkt "at"
+function totalPlayedMs(at: number): number {
+  if (sessionRunningSince.value === null) {
+    return sessionPlayedMs.value
+  }
+  return sessionPlayedMs.value + (at - sessionRunningSince.value)
 }
 
 // Fügt einen Abschnitt zur Liste hinzu. Gibt es Rudiment und Tempo dort schon,
@@ -120,6 +134,7 @@ const MAX_RESTORE_AGE_MS = 6 * 60 * 60 * 1000
 interface StoredRecording {
   savedAt: number
   sessionStartedAt: number
+  sessionPlayedMs: number
   closedSegments: PlayedRudiment[]
   // Ohne runningSince: Nach einem Neuladen ist das Metronom ohnehin gestoppt
   openSegment: { rudimentId: string; bpm: number; playedMs: number } | null
@@ -136,6 +151,7 @@ function saveRecording() {
     const stored: StoredRecording = {
       savedAt: timestamp,
       sessionStartedAt: sessionStartedAt.value,
+      sessionPlayedMs: totalPlayedMs(timestamp),
       closedSegments: closedSegments.value,
       openSegment:
         open === null
@@ -160,6 +176,9 @@ function restoreRecording() {
       return
     }
     sessionStartedAt.value = stored.sessionStartedAt
+    // Nach dem Neuladen ist das Metronom gestoppt, die Uhr steht also
+    sessionPlayedMs.value = stored.sessionPlayedMs ?? 0
+    sessionRunningSince.value = null
     closedSegments.value = stored.closedSegments
     openSegment.value =
       stored.openSegment === null ? null : { ...stored.openSegment, runningSince: null }
@@ -185,6 +204,8 @@ watch(isPlaying, (playing) => {
       sessionStartedAt.value = timestamp
       startClock()
     }
+    // Session-Uhr läuft weiter
+    sessionRunningSince.value = timestamp
     // Abschnitt fortsetzen oder neu beginnen
     if (openSegment.value === null) {
       openNewSegment()
@@ -194,12 +215,19 @@ watch(isPlaying, (playing) => {
     return
   }
 
-  // Pause: bisher gespielte Zeit im Abschnitt sichern
+  // Pause: Session-Uhr anhalten und die bisher gespielte Zeit sichern
+  if (sessionRunningSince.value !== null) {
+    sessionPlayedMs.value = sessionPlayedMs.value + (timestamp - sessionRunningSince.value)
+    sessionRunningSince.value = null
+  }
+
+  // Ebenso im laufenden Abschnitt
   const segment = openSegment.value
   if (segment !== null && segment.runningSince !== null) {
     segment.playedMs = segment.playedMs + (timestamp - segment.runningSince)
     segment.runningSince = null
   }
+  saveRecording()
 })
 
 // Rudiment oder Tempo gewechselt: neuer Abschnitt
@@ -216,13 +244,10 @@ watch([currentRudimentId, bpm], () => {
 
 const hasSession = computed(() => sessionStartedAt.value !== null)
 
-// Session-Zeit inklusive Pausen
-const sessionSeconds = computed(() => {
-  if (sessionStartedAt.value === null) {
-    return 0
-  }
-  return Math.floor((now.value - sessionStartedAt.value) / 1000)
-})
+// Session-Zeit: nur die Zeit, in der das Metronom lief.
+// now ändert sich jede Sekunde, dadurch rechnet computed laufend neu.
+// In der Pause ändert sich das Ergebnis trotzdem nicht, weil sessionRunningSince null ist.
+const sessionSeconds = computed(() => Math.floor(totalPlayedMs(now.value) / 1000))
 
 // Anzahl verschiedener Rudimente bisher (nur Abschnitte, die auch gezählt werden)
 const rudimentCount = computed(() => {
@@ -274,8 +299,8 @@ function buildSummary(): RecordedSession | null {
 
   // Durch das Runden pro Abschnitt kann die Summe minimal über der Session-Zeit liegen.
   // Das Backend würde das ablehnen, also die Session-Zeit notfalls anpassen.
-  const elapsedSeconds = Math.round((timestamp - sessionStartedAt.value) / 1000)
-  const durationSeconds = Math.max(elapsedSeconds, practiceSeconds)
+  const playedSeconds = Math.round(totalPlayedMs(timestamp) / 1000)
+  const durationSeconds = Math.max(playedSeconds, practiceSeconds)
 
   return {
     startDate: new Date(sessionStartedAt.value),
@@ -289,6 +314,8 @@ function resetRecording() {
   window.clearInterval(clockTimer)
   clockTimer = undefined
   sessionStartedAt.value = null
+  sessionPlayedMs.value = 0
+  sessionRunningSince.value = null
   closedSegments.value = []
   openSegment.value = null
   saveRecording() // entfernt die Sicherung
