@@ -57,8 +57,13 @@ export function formatMinutes(totalSeconds: number): string {
   return Math.round(totalSeconds / 60) + ' min'
 }
 
-// Übezeit als Stunden und Minuten: 6120 → "1:42 h", 2520 → "42 min"
+// Übezeit als Stunden und Minuten: 6120 → "1:42 h", 2520 → "42 min", 45 → "45 s"
 export function formatPracticeTime(totalSeconds: number): string {
+  // Unter einer Minute: Sekunden statt "0 min". Genau 0 bleibt "0 min".
+  if (totalSeconds > 0 && totalSeconds < 60) {
+    return totalSeconds + ' s'
+  }
+
   const hours = Math.floor(totalSeconds / 3600)
   const minutes = Math.floor((totalSeconds % 3600) / 60)
 

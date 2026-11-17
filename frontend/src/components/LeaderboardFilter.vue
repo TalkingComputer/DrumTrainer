@@ -32,27 +32,33 @@ const periodOptions: { value: Period; label: string }[] = [
 
 <template>
   <div class="leaderboard-filter">
-    <div class="rudiment-switcher">
-      <button
-        type="button"
-        class="switch-button"
-        aria-label="Previous rudiment"
-        @click="emit('previousRudiment')"
-      >
-        <AppIcon name="chevron-left" :size="20" />
-      </button>
-      <!-- aria-live: Screenreader lesen das neue Rudiment nach dem Wechsel vor -->
-      <span class="rudiment-label" aria-live="polite">{{ rudimentLabel }}</span>
-      <button
-        type="button"
-        class="switch-button"
-        aria-label="Next rudiment"
-        @click="emit('nextRudiment')"
-      >
-        <AppIcon name="chevron-right" :size="20" />
-      </button>
+    <!-- Obere Zeile: Rudiment-Wechsler links, rechts Platz für Buttons der Elternkomponente -->
+    <div class="filter-top">
+      <div class="rudiment-switcher">
+        <button
+          type="button"
+          class="switch-button"
+          aria-label="Previous rudiment"
+          @click="emit('previousRudiment')"
+        >
+          <AppIcon name="chevron-left" :size="20" />
+        </button>
+        <!-- aria-live: Screenreader lesen das neue Rudiment nach dem Wechsel vor -->
+        <span class="rudiment-label" aria-live="polite">{{ rudimentLabel }}</span>
+        <button
+          type="button"
+          class="switch-button"
+          aria-label="Next rudiment"
+          @click="emit('nextRudiment')"
+        >
+          <AppIcon name="chevron-right" :size="20" />
+        </button>
+      </div>
+      <!-- Benannter Slot: Der Dialog setzt hier den Button "Add Friend" ein -->
+      <slot name="actions" />
     </div>
 
+    <!-- Untere Zeile über die ganze Breite: Metrik links, Zeitraum rechts -->
     <div class="segments">
       <SegmentedControl v-model="metric" :options="metricOptions" label="Metric" />
       <SegmentedControl v-model="period" :options="periodOptions" label="Time period" />
@@ -67,10 +73,17 @@ const periodOptions: { value: Period; label: string }[] = [
   gap: 1rem;
 }
 
+.filter-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
 .rudiment-switcher {
   display: inline-flex;
   align-items: center;
-  align-self: flex-start;
   gap: 0.5rem;
   padding: 0.375rem;
   border-radius: 999px;

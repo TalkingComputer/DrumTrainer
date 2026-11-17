@@ -146,18 +146,21 @@ function openFriends() {
 <template>
   <AppDialog title="Leaderboard" size="lg">
     <div class="leaderboard-content">
-      <div class="top-row">
-        <LeaderboardFilter
-          v-model:metric="metric"
-          v-model:period="period"
-          :rudiment-label="rudimentLabel"
-          @previous-rudiment="switchRudiment(-1)"
-          @next-rudiment="switchRudiment(1)"
-        />
-        <button type="button" class="btn btn-primary add-friend" @click="openFriends">
-          Add Friend
-        </button>
-      </div>
+      <!-- Die Filter nehmen die volle Breite ein. "Add Friend" kommt über den
+           Slot "actions" in die obere Zeile des Filters, rechts neben den Rudiment-Wechsler. -->
+      <LeaderboardFilter
+        v-model:metric="metric"
+        v-model:period="period"
+        :rudiment-label="rudimentLabel"
+        @previous-rudiment="switchRudiment(-1)"
+        @next-rudiment="switchRudiment(1)"
+      >
+        <template #actions>
+          <button type="button" class="btn btn-primary add-friend" @click="openFriends">
+            Add Friend
+          </button>
+        </template>
+      </LeaderboardFilter>
 
       <ErrorAlert v-if="loadError" :message="loadError" show-retry @retry="loadLeaderboard" />
 
@@ -182,17 +185,6 @@ function openFriends() {
   gap: 1rem;
 }
 
-.top-row {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.top-row > :first-child {
-  flex-grow: 1;
-}
-
 .add-friend {
   flex-shrink: 0;
 }
@@ -200,13 +192,5 @@ function openFriends() {
 .is-refreshing {
   opacity: 0.6;
   transition: opacity 0.15s;
-}
-
-/* Handy: "Add Friend" unter die Filter */
-@media (max-width: 575.98px) {
-  .top-row {
-    flex-direction: column-reverse;
-    align-items: stretch;
-  }
 }
 </style>
