@@ -18,7 +18,11 @@ const props = defineProps<{
 // weil die Klasse is-active einfach dran bleibt.
 function dotKey(index: number): string {
   if (index === props.currentBeat) {
-    return 'active-' + (props.pulse ?? 0)
+    let pulse = 0
+    if (props.pulse !== undefined) {
+      pulse = props.pulse
+    }
+    return 'active-' + pulse
   }
   return 'dot-' + index
 }

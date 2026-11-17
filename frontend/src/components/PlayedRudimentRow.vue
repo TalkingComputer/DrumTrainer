@@ -33,12 +33,38 @@ const fieldId = useId()
 
 // ---------- Werte per Ziehen ändern ----------
 
+// Startwert fürs Ziehen. Ist das Feld leer, starten wir bei 120.
+function getBpmForDrag(): number {
+  if (typeof bpm.value === 'number') {
+    return bpm.value
+  }
+  return 120
+}
+
+// Neuer Wert beim Ziehen, im erlaubten Bereich gehalten
+function setBpmFromDrag(value: number) {
+  if (value < MIN_BPM) {
+    bpm.value = MIN_BPM
+  } else if (value > MAX_BPM) {
+    bpm.value = MAX_BPM
+  } else {
+    bpm.value = value
+  }
+}
+
+// Dauer im Feld als Sekunden. Unlesbarer Text zählt als 0.
+function currentDurationSeconds(): number {
+  const seconds = parseDuration(durationText.value)
+  if (seconds === null) {
+    return 0
+  }
+  return seconds
+}
+
 // BPM: 1 BPM pro 10 Pixel, im erlaubten Bereich
 const bpmDrag = useDragAdjust({
-  getValue: () => (typeof bpm.value === 'number' ? bpm.value : 120),
-  setValue: (value) => {
-    bpm.value = Math.min(MAX_BPM, Math.max(MIN_BPM, value))
-  },
+  getValue: getBpmForDrag,
+  setValue: setBpmFromDrag,
   step: 1,
   pixelsPerStep: 10,
 })
@@ -47,20 +73,24 @@ const bpmDrag = useDragAdjust({
 const DURATION_STEP = 10
 
 function changeDuration(seconds: number) {
-  durationText.value = toDurationText(Math.max(0, seconds))
+  // Nie unter 0
+  if (seconds < 0) {
+    seconds = 0
+  }
+  durationText.value = toDurationText(seconds)
 }
 
 const durationDrag = useDragAdjust({
-  getValue: () => parseDuration(durationText.value) ?? 0,
+  getValue: currentDurationSeconds,
   setValue: changeDuration,
   step: DURATION_STEP,
   pixelsPerStep: 6,
 })
 
-// Tastatur im Dauer-Feld: Pfeil hoch/runter ändert um 15 Sekunden.
+// Tastatur im Dauer-Feld: Pfeil hoch/runter ändert um DURATION_STEP Sekunden.
 // Das BPM-Feld (type="number") kann das schon von selbst.
 function handleDurationKeydown(event: KeyboardEvent) {
-  const current = parseDuration(durationText.value) ?? 0
+  const current = currentDurationSeconds()
   if (event.key === 'ArrowUp') {
     event.preventDefault()
     changeDuration(current + DURATION_STEP)

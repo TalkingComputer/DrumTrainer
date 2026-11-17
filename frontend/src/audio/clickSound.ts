@@ -19,13 +19,21 @@ export function playClick(context: AudioContext, time: number, isAccent: boolean
   const oscillator = context.createOscillator()
   const gain = context.createGain()
 
-  oscillator.type = 'triangle'
-  oscillator.frequency.value = isAccent ? ACCENT_FREQUENCY : NORMAL_FREQUENCY
+  oscillator.type = 'sine'
+  // Schlag 1 höher, alle anderen normal
+  if (isAccent) {
+    oscillator.frequency.value = ACCENT_FREQUENCY
+  } else {
+    oscillator.frequency.value = NORMAL_FREQUENCY
+  }
 
   // Hüllkurve: in 2 ms auf volle Lautstärke, dann schnell abklingen.
   // Ein harter Ein- und Ausschalter würde knacken.
   // Exponentielle Rampen dürfen nicht bei 0 starten, deshalb 0.0001.
-  const peak = isAccent ? ACCENT_VOLUME : NORMAL_VOLUME
+  let peak = NORMAL_VOLUME
+  if (isAccent) {
+    peak = ACCENT_VOLUME
+  }
   gain.gain.setValueAtTime(0.0001, time)
   gain.gain.exponentialRampToValueAtTime(peak, time + 0.002)
   gain.gain.exponentialRampToValueAtTime(0.0001, time + CLICK_LENGTH)

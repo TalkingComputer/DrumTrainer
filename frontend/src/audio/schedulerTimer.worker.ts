@@ -17,10 +17,16 @@ interface TimerCommand {
 
 self.onmessage = (event: MessageEvent<TimerCommand>) => {
   if (event.data.command === 'start') {
+    // Ohne Angabe alle 25 ms
+    let intervalMs = 25
+    if (event.data.intervalMs !== undefined) {
+      intervalMs = event.data.intervalMs
+    }
+
     clearInterval(timerId)
     timerId = setInterval(() => {
       postMessage('tick')
-    }, event.data.intervalMs ?? 25)
+    }, intervalMs)
   } else {
     clearInterval(timerId)
     timerId = undefined

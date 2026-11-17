@@ -25,11 +25,21 @@ const progressPercent = computed(() => {
     return 100
   }
   const done = ((props.currentBpm - props.startBpm) / range) * 100
-  return Math.min(100, Math.max(0, done))
+  // Auf 0 bis 100 begrenzen
+  if (done < 0) {
+    return 0
+  }
+  if (done > 100) {
+    return 100
+  }
+  return done
 })
 
 const nextStepText = computed(() => {
-  const word = props.measuresUntilNextStep === 1 ? 'measure' : 'measures'
+  let word = 'measures'
+  if (props.measuresUntilNextStep === 1) {
+    word = 'measure'
+  }
   return `Next step +${props.stepBpm} BPM in ${props.measuresUntilNextStep} ${word}`
 })
 </script>

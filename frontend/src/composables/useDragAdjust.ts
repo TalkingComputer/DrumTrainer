@@ -62,7 +62,10 @@ export function useDragAdjust(options: DragAdjustOptions) {
     const deltaX = event.clientX - startX
     // Bildschirm-y wächst nach unten. Wir drehen es um: nach oben = positiv.
     // Bei invertVertical bleibt es wie auf dem Bildschirm: nach unten = positiv.
-    const deltaY = options.invertVertical ? event.clientY - startY : startY - event.clientY
+    let deltaY = startY - event.clientY
+    if (options.invertVertical) {
+      deltaY = event.clientY - startY
+    }
 
     if (!isDragging) {
       if (Math.abs(deltaX) < DRAG_THRESHOLD && Math.abs(deltaY) < DRAG_THRESHOLD) {

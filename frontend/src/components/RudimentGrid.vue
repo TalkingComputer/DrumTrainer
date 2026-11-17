@@ -11,6 +11,11 @@ defineProps<{
 const emit = defineEmits<{
   select: [rudimentId: string]
 }>()
+
+// Meldung einer Karte einfach nach oben weiterreichen
+function forwardSelect(rudimentId: string) {
+  emit('select', rudimentId)
+}
 </script>
 
 <template>
@@ -20,7 +25,7 @@ const emit = defineEmits<{
       <RudimentCard
         :rudiment="rudiment"
         :is-active="rudiment.id === activeRudimentId"
-        @select="(rudimentId) => emit('select', rudimentId)"
+        @select="forwardSelect"
       />
     </li>
   </ul>

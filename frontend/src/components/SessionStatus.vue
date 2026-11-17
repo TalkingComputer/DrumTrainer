@@ -12,7 +12,10 @@ const props = defineProps<{
 }>()
 
 const rudimentText = computed(() => {
-  const word = props.rudimentCount === 1 ? 'rudiment' : 'rudiments'
+  let word = 'rudiments'
+  if (props.rudimentCount === 1) {
+    word = 'rudiment'
+  }
   return props.rudimentCount + ' ' + word
 })
 </script>

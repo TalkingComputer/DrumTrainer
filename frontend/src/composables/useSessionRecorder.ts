@@ -99,7 +99,11 @@ function openNewSegment() {
     rudimentId: currentRudimentId.value,
     bpm: bpm.value,
     playedMs: 0,
-    runningSince: isPlaying.value ? Date.now() : null,
+    runningSince: null,
+  }
+  // Läuft das Metronom gerade, läuft auch der neue Abschnitt sofort
+  if (isPlaying.value) {
+    openSegment.value.runningSince = Date.now()
   }
 }
 
@@ -153,10 +157,14 @@ function saveRecording() {
       sessionStartedAt: sessionStartedAt.value,
       sessionPlayedMs: totalPlayedMs(timestamp),
       closedSegments: closedSegments.value,
-      openSegment:
-        open === null
-          ? null
-          : { rudimentId: open.rudimentId, bpm: open.bpm, playedMs: segmentMs(open, timestamp) },
+      openSegment: null,
+    }
+    if (open !== null) {
+      stored.openSegment = {
+        rudimentId: open.rudimentId,
+        bpm: open.bpm,
+        playedMs: segmentMs(open, timestamp),
+      }
     }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(stored))
   } catch {
@@ -177,11 +185,21 @@ function restoreRecording() {
     }
     sessionStartedAt.value = stored.sessionStartedAt
     // Nach dem Neuladen ist das Metronom gestoppt, die Uhr steht also
-    sessionPlayedMs.value = stored.sessionPlayedMs ?? 0
+    sessionPlayedMs.value = 0
+    if (typeof stored.sessionPlayedMs === 'number') {
+      sessionPlayedMs.value = stored.sessionPlayedMs
+    }
     sessionRunningSince.value = null
     closedSegments.value = stored.closedSegments
-    openSegment.value =
-      stored.openSegment === null ? null : { ...stored.openSegment, runningSince: null }
+    openSegment.value = null
+    if (stored.openSegment !== null) {
+      openSegment.value = {
+        rudimentId: stored.openSegment.rudimentId,
+        bpm: stored.openSegment.bpm,
+        playedMs: stored.openSegment.playedMs,
+        runningSince: null,
+      }
+    }
     startClock()
   } catch {
     // Kaputte Daten: ignorieren und ohne Aufnahme starten
@@ -277,7 +295,11 @@ function buildSummary(): RecordedSession | null {
   // Kopie der Liste, damit die Momentaufnahme die Aufnahme nicht verändert
   const allSegments: PlayedRudiment[] = []
   for (const segment of closedSegments.value) {
-    allSegments.push({ ...segment })
+    allSegments.push({
+      rudimentId: segment.rudimentId,
+      bpm: segment.bpm,
+      durationSeconds: segment.durationSeconds,
+    })
   }
   const open = openSegment.value
   if (open !== null) {
@@ -300,7 +322,10 @@ function buildSummary(): RecordedSession | null {
   // Durch das Runden pro Abschnitt kann die Summe minimal über der Session-Zeit liegen.
   // Das Backend würde das ablehnen, also die Session-Zeit notfalls anpassen.
   const playedSeconds = Math.round(totalPlayedMs(timestamp) / 1000)
-  const durationSeconds = Math.max(playedSeconds, practiceSeconds)
+  let durationSeconds = playedSeconds
+  if (practiceSeconds > durationSeconds) {
+    durationSeconds = practiceSeconds
+  }
 
   return {
     startDate: new Date(sessionStartedAt.value),

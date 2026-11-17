@@ -199,8 +199,10 @@ function updateDisplay(): void {
 
     // Alle Klicks entnehmen, deren Zeitpunkt erreicht ist. Bei einem Tab-Wechsel
     // können das mehrere sein, angezeigt wird nur der neueste.
-    while (scheduledClicks.length > 0 && scheduledClicks[0]!.time <= now) {
+    let nextInQueue = scheduledClicks[0]
+    while (nextInQueue !== undefined && nextInQueue.time <= now) {
       lastPlayed = scheduledClicks.shift()
+      nextInQueue = scheduledClicks[0]
     }
 
     if (lastPlayed !== undefined) {
@@ -247,7 +249,9 @@ async function start(): Promise<void> {
 function stop(): void {
   // Ohne laufendes Metronom gibt es nichts zu steigern
   stopAutomation()
-  timerWorker?.postMessage({ command: 'stop' })
+  if (timerWorker !== null) {
+    timerWorker.postMessage({ command: 'stop' })
+  }
 
   if (animationFrameId !== null) {
     cancelAnimationFrame(animationFrameId)
@@ -319,7 +323,10 @@ function onMeasureStart(): void {
   // Genug Takte gespielt: nächste Stufe, aber nie über das Ziel hinaus
   automationMeasuresDone.value = 0
   automationStep.value = automationStep.value + 1
-  const nextBpm = Math.min(bpm.value + automation.value.stepBpm, automation.value.endBpm)
+  let nextBpm = bpm.value + automation.value.stepBpm
+  if (nextBpm > automation.value.endBpm) {
+    nextBpm = automation.value.endBpm
+  }
   applyBpm(nextBpm)
 
   // Ziel erreicht: Automation endet, das Metronom spielt im Ziel-Tempo weiter

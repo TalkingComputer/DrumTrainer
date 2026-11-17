@@ -15,6 +15,7 @@ import LoadingSpinner from '@/components/LoadingSpinner.vue'
 import ErrorAlert from '@/components/ErrorAlert.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import { useToast } from '@/composables/useToast'
+import { getErrorMessage } from '@/utils/errors'
 
 const { loadRudiments } = useRudiments()
 const router = useRouter()
@@ -42,7 +43,7 @@ async function loadSessions() {
   try {
     sessions.value = await getSessions()
   } catch (error) {
-    loadError.value = error instanceof Error ? error.message : 'Could not load sessions.'
+    loadError.value = getErrorMessage(error, 'Could not load sessions.')
   } finally {
     isLoading.value = false
   }
@@ -78,7 +79,10 @@ const practiceSecondsThisWeek = computed(() => {
 
 const weekSummary = computed(() => {
   const count = sessionsThisWeek.value.length
-  const word = count === 1 ? 'session' : 'sessions'
+  let word = 'sessions'
+  if (count === 1) {
+    word = 'session'
+  }
   return (
     count +
     ' ' +
@@ -121,7 +125,7 @@ async function confirmDelete() {
     sessions.value = sessions.value.filter((item) => item.id !== session.id)
     sessionToDelete.value = null
   } catch (error) {
-    deleteError.value = error instanceof Error ? error.message : 'Could not delete the session.'
+    deleteError.value = getErrorMessage(error, 'Could not delete the session.')
   } finally {
     isDeleting.value = false
   }

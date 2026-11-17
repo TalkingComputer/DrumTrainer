@@ -9,13 +9,18 @@ defineProps<{
 const emit = defineEmits<{
   remove: [friend: PublicPlayer]
 }>()
+
+// Meldung einer Zeile einfach nach oben weiterreichen
+function forwardRemove(friend: PublicPlayer) {
+  emit('remove', friend)
+}
 </script>
 
 <template>
   <ul class="friend-list">
     <!-- Der Freundescode ist eindeutig, also ein guter key -->
     <li v-for="friend in friends" :key="friend.friendCode">
-      <FriendRow :friend="friend" @remove="(clicked) => emit('remove', clicked)" />
+      <FriendRow :friend="friend" @remove="forwardRemove" />
     </li>
   </ul>
 </template>

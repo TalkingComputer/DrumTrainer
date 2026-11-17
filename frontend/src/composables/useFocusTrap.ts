@@ -70,14 +70,24 @@ export function useFocusTrap(
       previouslyFocused = document.activeElement
     }
     trappedElement = container.value
-    trappedElement?.addEventListener('keydown', handleKeydown)
+    if (trappedElement !== null) {
+      trappedElement.addEventListener('keydown', handleKeydown)
+    }
 
-    const initial = getInitialFocus ? getInitialFocus() : container.value
-    initial?.focus()
+    // Erstes Fokus-Ziel: das vom Aufrufer gewünschte Element, sonst der Container
+    let initial = container.value
+    if (getInitialFocus !== undefined) {
+      initial = getInitialFocus()
+    }
+    if (initial !== null) {
+      initial.focus()
+    }
   })
 
   onBeforeUnmount(() => {
-    trappedElement?.removeEventListener('keydown', handleKeydown)
+    if (trappedElement !== null) {
+      trappedElement.removeEventListener('keydown', handleKeydown)
+    }
   })
 
   onUnmounted(() => {

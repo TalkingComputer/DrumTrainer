@@ -8,7 +8,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { createSession, getSession, updateSession } from '@/api/sessions'
 import { MAX_BPM, MIN_BPM, useMetronome } from '@/composables/useMetronome'
 import { useRudiments } from '@/composables/useRudiments'
-import { useCloseDialog } from '@/composables/useCloseDialog'
+import { cameFromApp, useCloseDialog } from '@/composables/useCloseDialog'
 import { useSessionRecorder } from '@/composables/useSessionRecorder'
 import {
   combineDateAndTime,
@@ -26,6 +26,7 @@ import LoadingSpinner from '@/components/LoadingSpinner.vue'
 import ErrorAlert from '@/components/ErrorAlert.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import { useToast } from '@/composables/useToast'
+import { getErrorMessage } from '@/utils/errors'
 
 // Kommt aus der URL /sessions/:sessionId/edit (router: props: true).
 // Fehlt sie, legt das Formular eine neue Session an.
@@ -132,7 +133,7 @@ async function loadExistingSession(sessionId: string) {
     const session = await getSession(sessionId)
     fillForm(new Date(session.date), session.durationSeconds, session.playedRudiments)
   } catch (error) {
-    loadError.value = error instanceof Error ? error.message : 'Could not load the session.'
+    loadError.value = getErrorMessage(error, 'Could not load the session.')
   } finally {
     isLoadingSession.value = false
   }
@@ -250,6 +251,10 @@ function handleDiscard() {
   }
 }
 
+function cancelDiscard() {
+  isConfirmingDiscard.value = false
+}
+
 function confirmDiscard() {
   isConfirmingDiscard.value = false
   resetRecording()
@@ -300,13 +305,13 @@ async function handleSave() {
     // Zurück zur Liste. Sie lädt beim Öffnen neu und zeigt die neue Session.
     // Kam man aus der Liste, geht es per back() dorthin zurück (kein doppelter
     // Eintrag im Verlauf). Wurde /sessions/new direkt geöffnet, per replace.
-    if (window.history.state?.back) {
+    if (cameFromApp()) {
       router.back()
     } else {
       await router.replace({ name: 'sessions' })
     }
   } catch (error) {
-    saveError.value = error instanceof Error ? error.message : 'Could not save the session.'
+    saveError.value = getErrorMessage(error, 'Could not save the session.')
   } finally {
     isSaving.value = false
   }
@@ -451,7 +456,7 @@ async function handleSave() {
       message="Your recorded practice time will be lost. You cannot undo this."
       confirm-label="Discard"
       @confirm="confirmDiscard"
-      @cancel="isConfirmingDiscard = false"
+      @cancel="cancelDiscard"
     />
   </AppDialog>
 </template>

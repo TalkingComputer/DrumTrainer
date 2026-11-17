@@ -13,6 +13,7 @@ import LeaderboardFilter from '@/components/LeaderboardFilter.vue'
 import LeaderboardTable from '@/components/LeaderboardTable.vue'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
 import ErrorAlert from '@/components/ErrorAlert.vue'
+import { getErrorMessage } from '@/utils/errors'
 
 const router = useRouter()
 const { currentRudimentId } = useMetronome()
@@ -23,7 +24,10 @@ const metric = ref<Metric>('bpm')
 const period = ref<Period>('week')
 // undefined heißt "alle Rudimente". Das gibt es nur bei Practice time.
 // Start: das Rudiment, das gerade im Metronom gewählt ist.
-const rudimentId = ref<string | undefined>(currentRudimentId.value ?? undefined)
+const rudimentId = ref<string | undefined>(undefined)
+if (currentRudimentId.value !== null) {
+  rudimentId.value = currentRudimentId.value
+}
 
 // Die Reihenfolge, in der < und > durchschalten
 const rudimentChoices = computed(() => {
@@ -52,14 +56,30 @@ const rudimentLabel = computed(() => {
   if (rudimentId.value === undefined) {
     return 'All rudiments'
   }
-  return findRudiment(rudimentId.value)?.name ?? rudimentId.value
+  const rudiment = findRudiment(rudimentId.value)
+  if (rudiment === undefined) {
+    return rudimentId.value
+  }
+  return rudiment.name
 })
+
+// Das Rudiment des Metronoms oder, falls keins gewählt ist, das erste der Liste
+function currentOrFirstRudimentId(): string | undefined {
+  if (currentRudimentId.value !== null) {
+    return currentRudimentId.value
+  }
+  const first = rudiments.value[0]
+  if (first === undefined) {
+    return undefined
+  }
+  return first.id
+}
 
 // Best BPM braucht ein bestimmtes Rudiment (wie im Backend).
 // Steht beim Wechsel auf Best BPM "All rudiments", nehmen wir das aktuelle bzw. erste.
 watch(metric, (newMetric) => {
   if (newMetric === 'bpm' && rudimentId.value === undefined) {
-    rudimentId.value = currentRudimentId.value ?? rudiments.value[0]?.id
+    rudimentId.value = currentOrFirstRudimentId()
   }
 })
 
@@ -93,7 +113,7 @@ async function loadLeaderboard() {
     }
   } catch (error) {
     if (thisRequest === latestRequest) {
-      loadError.value = error instanceof Error ? error.message : 'Could not load the leaderboard.'
+      loadError.value = getErrorMessage(error, 'Could not load the leaderboard.')
     }
   } finally {
     if (thisRequest === latestRequest) {
@@ -109,7 +129,7 @@ onMounted(async () => {
   await loadRudiments()
   if (rudimentId.value === undefined && metric.value === 'bpm') {
     // Setzen löst den watch oben aus, der lädt dann
-    rudimentId.value = rudiments.value[0]?.id
+    rudimentId.value = currentOrFirstRudimentId()
   } else {
     loadLeaderboard()
   }

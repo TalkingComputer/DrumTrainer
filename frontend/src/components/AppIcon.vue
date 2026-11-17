@@ -42,7 +42,14 @@ const ICON_PATHS: Record<string, string[]> = {
   clock: ['M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0', 'M12 7v5l3 2'],
 }
 
-const paths = computed(() => ICON_PATHS[props.name] ?? [])
+// Pfade zum gewünschten Icon. Unbekannter Name: leere Liste, also kein Icon.
+const paths = computed(() => {
+  const found = ICON_PATHS[props.name]
+  if (found === undefined) {
+    return []
+  }
+  return found
+})
 </script>
 
 <template>

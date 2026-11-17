@@ -10,15 +10,21 @@
 
 import { useRouter } from 'vue-router'
 
+// Vue Router merkt sich im Browserverlauf unter "back", von welcher Seite man kam.
+// Steht dort etwas, wurde der Dialog aus der App heraus geöffnet.
+export function cameFromApp(): boolean {
+  const state = window.history.state
+  if (state === null || state === undefined) {
+    return false
+  }
+  return state.back !== null && state.back !== undefined
+}
+
 export function useCloseDialog() {
   const router = useRouter()
 
   function closeDialog(): void {
-    // Vue Router merkt sich im Browserverlauf, von welcher Seite man kam
-    const cameFromApp =
-      window.history.state?.back !== null && window.history.state?.back !== undefined
-
-    if (cameFromApp) {
+    if (cameFromApp()) {
       router.back()
     } else {
       router.replace({ name: 'metronome' })

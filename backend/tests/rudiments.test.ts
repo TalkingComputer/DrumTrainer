@@ -17,7 +17,9 @@ Deno.test("die Liste ist nicht leer", () => {
 
 Deno.test("ein Rudiment lässt sich über seine id finden", () => {
   const first = getAllRudiments()[0];
-  assert.equal(getRudimentById(first.id)?.name, first.name);
+  const found = getRudimentById(first.id);
+  assert.ok(found !== undefined);
+  assert.equal(found.name, first.name);
 });
 
 Deno.test("eine unbekannte id liefert undefined", () => {

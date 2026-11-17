@@ -21,22 +21,38 @@ const props = withDefaults(
 )
 
 function setValue(newValue: number) {
-  value.value = Math.min(props.max, Math.max(props.min, newValue))
+  // Im erlaubten Bereich halten
+  if (newValue < props.min) {
+    value.value = props.min
+  } else if (newValue > props.max) {
+    value.value = props.max
+  } else {
+    value.value = newValue
+  }
 }
 
 function format(number: number): string {
-  return (props.showPlus ? '+' : '') + number
+  if (props.showPlus) {
+    return '+' + number
+  }
+  return String(number)
 }
 
 // Nachbarwerte. Außerhalb des Bereichs bleibt die Stelle leer.
 const previousText = computed(() => {
   const previous = value.value - props.step
-  return previous >= props.min ? format(previous) : ''
+  if (previous < props.min) {
+    return ''
+  }
+  return format(previous)
 })
 
 const nextText = computed(() => {
   const next = value.value + props.step
-  return next <= props.max ? format(next) : ''
+  if (next > props.max) {
+    return ''
+  }
+  return format(next)
 })
 
 // Ziehen wie an einem echten Rad: Den oberen (höheren) Wert zieht man nach unten

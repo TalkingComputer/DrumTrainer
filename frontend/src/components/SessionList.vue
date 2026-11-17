@@ -10,16 +10,21 @@ const emit = defineEmits<{
   edit: [session: Session]
   delete: [session: Session]
 }>()
+
+// Meldungen einer Karte einfach nach oben weiterreichen
+function forwardEdit(session: Session) {
+  emit('edit', session)
+}
+
+function forwardDelete(session: Session) {
+  emit('delete', session)
+}
 </script>
 
 <template>
   <ul class="session-list">
     <li v-for="session in sessions" :key="session.id">
-      <SessionCard
-        :session="session"
-        @edit="(clicked) => emit('edit', clicked)"
-        @delete="(clicked) => emit('delete', clicked)"
-      />
+      <SessionCard :session="session" @edit="forwardEdit" @delete="forwardDelete" />
     </li>
   </ul>
 </template>

@@ -16,12 +16,9 @@ import LoadingSpinner from '@/components/LoadingSpinner.vue'
 import ErrorAlert from '@/components/ErrorAlert.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import { useToast } from '@/composables/useToast'
+import { getErrorMessage } from '@/utils/errors'
 
 const { showToast } = useToast()
-
-function messageOf(error: unknown, fallback: string): string {
-  return error instanceof Error ? error.message : fallback
-}
 
 // ---------- Laden ----------
 const player = ref<Player | null>(null)
@@ -40,7 +37,7 @@ async function loadAll() {
     nameInput.value = me.name
     friends.value = friendList
   } catch (error) {
-    loadError.value = messageOf(error, 'Could not load your friends.')
+    loadError.value = getErrorMessage(error, 'Could not load your friends.')
   } finally {
     isLoading.value = false
   }
@@ -68,7 +65,7 @@ async function saveName() {
       justRenamed.value = false
     }, 3000)
   } catch (error) {
-    renameError.value = messageOf(error, 'Could not save your name.')
+    renameError.value = getErrorMessage(error, 'Could not save your name.')
   } finally {
     isRenaming.value = false
   }
@@ -94,7 +91,7 @@ async function handleAdd() {
   } catch (error) {
     // Das Backend liefert passende Meldungen für 404 (Code unbekannt)
     // und 409 (schon befreundet, eigener Code)
-    addError.value = messageOf(error, 'Could not add this friend.')
+    addError.value = getErrorMessage(error, 'Could not add this friend.')
   } finally {
     isAdding.value = false
   }
@@ -110,6 +107,10 @@ function askRemove(friend: PublicPlayer) {
   removeError.value = ''
 }
 
+function cancelRemove() {
+  friendToRemove.value = null
+}
+
 async function confirmRemove() {
   const friend = friendToRemove.value
   if (friend === null) {
@@ -123,7 +124,7 @@ async function confirmRemove() {
     friendToRemove.value = null
     showToast(friend.name + ' removed')
   } catch (error) {
-    removeError.value = messageOf(error, 'Could not remove this friend.')
+    removeError.value = getErrorMessage(error, 'Could not remove this friend.')
   } finally {
     isRemoving.value = false
   }
@@ -182,7 +183,7 @@ async function confirmRemove() {
       :is-busy="isRemoving"
       :error-message="removeError"
       @confirm="confirmRemove"
-      @cancel="friendToRemove = null"
+      @cancel="cancelRemove"
     />
   </AppDialog>
 </template>
