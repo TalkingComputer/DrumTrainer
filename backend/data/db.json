@@ -176,6 +176,59 @@
           "durationSeconds": 23
         }
       ]
+    },
+    {
+      "id": "3af9928d-eb71-4159-b752-03456c0e0d5b",
+      "playerId": "26a485c3-5c55-47a9-822f-a29057ab85b3",
+      "date": "2026-11-17T15:47:00.000Z",
+      "durationSeconds": 80,
+      "playedRudiments": [
+        {
+          "rudimentId": "single-stroke-roll",
+          "bpm": 120,
+          "durationSeconds": 15
+        },
+        {
+          "rudimentId": "single-stroke-roll",
+          "bpm": 100,
+          "durationSeconds": 11
+        },
+        {
+          "rudimentId": "single-stroke-roll",
+          "bpm": 105,
+          "durationSeconds": 9
+        },
+        {
+          "rudimentId": "single-stroke-roll",
+          "bpm": 110,
+          "durationSeconds": 9
+        },
+        {
+          "rudimentId": "single-stroke-roll",
+          "bpm": 115,
+          "durationSeconds": 8
+        },
+        {
+          "rudimentId": "single-stroke-roll",
+          "bpm": 125,
+          "durationSeconds": 8
+        },
+        {
+          "rudimentId": "single-stroke-roll",
+          "bpm": 130,
+          "durationSeconds": 7
+        },
+        {
+          "rudimentId": "single-stroke-roll",
+          "bpm": 135,
+          "durationSeconds": 7
+        },
+        {
+          "rudimentId": "single-stroke-roll",
+          "bpm": 140,
+          "durationSeconds": 5
+        }
+      ]
     }
   ],
   "friendships": [

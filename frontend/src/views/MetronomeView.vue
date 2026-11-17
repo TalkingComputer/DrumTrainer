@@ -17,6 +17,8 @@ import TempoDisplay from '@/components/TempoDisplay.vue'
 import BeatIndicator from '@/components/BeatIndicator.vue'
 import BeatsPerMeasureControl from '@/components/BeatsPerMeasureControl.vue'
 import ControlBar from '@/components/ControlBar.vue'
+import AutomationStatus from '@/components/AutomationStatus.vue'
+import ErrorAlert from '@/components/ErrorAlert.vue'
 
 const router = useRouter()
 
@@ -28,6 +30,12 @@ const {
   beatPulse,
   isPlaying,
   currentRudimentId,
+  automation,
+  isAutomationRunning,
+  automationStep,
+  automationTotalSteps,
+  measuresUntilNextStep,
+  stopAutomation,
   setBpm,
   increaseBpm,
   decreaseBpm,
@@ -114,13 +122,19 @@ onMounted(async () => {
     // Andere Fehler (z. B. Backend aus) zeigt unten der Rudiment-Fehler an
   }
 
-  // 2. Rudimente laden und das erste wählen, falls noch keins gewählt ist
+  // 2. Rudimente laden und das erste wählen
+  await loadAndSelectRudiment()
+})
+
+// Rudimente laden und das erste wählen, falls noch keins gewählt ist.
+// Auch für "Try again", wenn das Backend beim Start nicht erreichbar war.
+async function loadAndSelectRudiment() {
   await loadRudiments()
   const firstRudiment = rudiments.value[0]
   if (currentRudimentId.value === null && firstRudiment !== undefined) {
     selectRudiment(firstRudiment.id)
   }
-})
+}
 
 // Dialog öffnen = zu seiner Route wechseln. Die Route ist eine Kind-Route,
 // MetronomeView bleibt also stehen und der Dialog erscheint darüber.
@@ -159,13 +173,17 @@ function sendSession() {
         v-if="hasSession"
         :session-seconds="sessionSeconds"
         :rudiment-count="rudimentCount"
+        :is-recording="isPlaying"
       />
     </TopBar>
 
     <main class="metronome-main container">
-      <div v-if="rudimentError" class="alert alert-danger" role="alert">
-        {{ rudimentError }}
-      </div>
+      <ErrorAlert
+        v-if="rudimentError"
+        :message="rudimentError"
+        show-retry
+        @retry="loadAndSelectRudiment"
+      />
 
       <div class="row align-items-center gy-4 gy-lg-0">
         <div class="col-12 col-lg-6">
@@ -203,6 +221,19 @@ function sendSession() {
           >
             {{ tapCount === 1 ? 'Keep tapping…' : 'Tap tempo' }}
           </button>
+
+          <!-- Nur sichtbar, solange die Automation läuft (Phase 6) -->
+          <AutomationStatus
+            v-if="isAutomationRunning"
+            :start-bpm="automation.startBpm"
+            :end-bpm="automation.endBpm"
+            :current-bpm="bpm"
+            :step-bpm="automation.stepBpm"
+            :measures-until-next-step="measuresUntilNextStep"
+            :step="automationStep"
+            :total-steps="automationTotalSteps"
+            @stop="stopAutomation"
+          />
         </div>
       </div>
     </main>

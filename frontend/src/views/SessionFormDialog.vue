@@ -25,6 +25,7 @@ import PlayedRudimentRow from '@/components/PlayedRudimentRow.vue'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
 import ErrorAlert from '@/components/ErrorAlert.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import { useToast } from '@/composables/useToast'
 
 // Kommt aus der URL /sessions/:sessionId/edit (router: props: true).
 // Fehlt sie, legt das Formular eine neue Session an.
@@ -50,6 +51,7 @@ const dialogTitle = computed(() => {
 })
 
 const { buildSummary, resetRecording } = useSessionRecorder()
+const { showToast } = useToast()
 const { closeDialog } = useCloseDialog()
 const { bpm: metronomeBpm, currentRudimentId } = useMetronome()
 const { rudiments, isLoading: rudimentsLoading, loadRudiments } = useRudiments()
@@ -196,34 +198,44 @@ function isValidDuration(text: string): boolean {
 // Erst nach dem ersten Klick auf "Save" rot färben, nicht schon beim Tippen
 const showErrors = ref(false)
 
-// Liste aller Probleme als Text. Leer = Formular gültig.
-const problems = computed(() => {
-  const result: string[] = []
+// Ein Problem pro Bereich des Formulars. Jede Meldung erscheint direkt unter
+// dem Feld, zu dem sie gehört. Leerer Text = kein Problem.
 
+const dateProblem = computed(() => {
+  if (startDate.value === null) {
+    return 'Enter a valid date and start time.'
+  }
+  if (startDate.value > new Date()) {
+    return 'The session cannot start in the future.'
+  }
+  return ''
+})
+
+const lengthProblem = computed(() => {
+  if (sessionSeconds.value === null) {
+    return 'Enter the session length like 26:10.'
+  }
+  if (practiceSeconds.value > sessionSeconds.value) {
+    return 'Practice time must not exceed the session time.'
+  }
+  return ''
+})
+
+const rowsProblem = computed(() => {
   if (rows.value.length === 0) {
-    result.push('Add at least one rudiment.')
+    return 'Add at least one rudiment.'
   }
   for (const row of rows.value) {
     if (row.rudimentId === '' || !isValidBpm(row.bpm) || !isValidDuration(row.durationText)) {
-      result.push(
-        `Every rudiment needs a tempo between ${MIN_BPM} and ${MAX_BPM} BPM and a duration like 5:00.`,
-      )
-      break
+      return `Every rudiment needs a tempo between ${MIN_BPM} and ${MAX_BPM} BPM and a duration like 5:00.`
     }
   }
-  if (startDate.value === null) {
-    result.push('Enter a valid date and start time.')
-  } else if (startDate.value > new Date()) {
-    result.push('The session cannot start in the future.')
-  }
-  if (sessionSeconds.value === null) {
-    result.push('Enter the session length like 26:10.')
-  } else if (practiceSeconds.value > sessionSeconds.value) {
-    result.push('Practice time must not exceed the session time.')
-  }
-
-  return result
+  return ''
 })
+
+const hasProblems = computed(
+  () => dateProblem.value !== '' || lengthProblem.value !== '' || rowsProblem.value !== '',
+)
 
 // ---------- Verwerfen ----------
 // Beim Nachtragen und Bearbeiten schließt "Discard" einfach das Formular.
@@ -242,6 +254,7 @@ function confirmDiscard() {
   isConfirmingDiscard.value = false
   resetRecording()
   closeDialog()
+  showToast('Session discarded')
 }
 
 // ---------- Speichern ----------
@@ -252,7 +265,7 @@ const saveError = ref('')
 async function handleSave() {
   showErrors.value = true
   saveError.value = ''
-  if (problems.value.length > 0 || startDate.value === null || sessionSeconds.value === null) {
+  if (hasProblems.value || startDate.value === null || sessionSeconds.value === null) {
     return
   }
 
@@ -271,8 +284,10 @@ async function handleSave() {
   try {
     if (props.sessionId !== undefined) {
       await updateSession(props.sessionId, input)
+      showToast('Session updated')
     } else {
       await createSession(input)
+      showToast('Session saved')
     }
 
     // Aufnahme gespeichert: Recorder leeren, zurück zum Übe-Bildschirm
@@ -332,7 +347,9 @@ async function handleSave() {
             type="date"
             class="form-control form-control-lg"
             :max="toDateInputValue(new Date())"
-            :class="{ 'is-invalid': showErrors && startDate === null }"
+            :class="{ 'is-invalid': showErrors && dateProblem !== '' }"
+            :aria-invalid="showErrors && dateProblem !== ''"
+            aria-describedby="session-date-error"
           />
         </div>
         <div class="col-6 col-sm-4">
@@ -342,7 +359,9 @@ async function handleSave() {
             v-model="startTimeText"
             type="time"
             class="form-control form-control-lg"
-            :class="{ 'is-invalid': showErrors && startDate === null }"
+            :class="{ 'is-invalid': showErrors && dateProblem !== '' }"
+            :aria-invalid="showErrors && dateProblem !== ''"
+            aria-describedby="session-date-error"
           />
         </div>
         <div class="col-12 col-sm-4">
@@ -354,10 +373,22 @@ async function handleSave() {
             inputmode="numeric"
             class="form-control form-control-lg"
             :placeholder="formatTimer(practiceSeconds)"
-            aria-describedby="session-length-hint"
-            :class="{ 'is-invalid': showErrors && sessionSeconds === null }"
+            aria-describedby="session-length-hint session-length-error"
+            :class="{ 'is-invalid': showErrors && lengthProblem !== '' }"
+            :aria-invalid="showErrors && lengthProblem !== ''"
           />
           <div id="session-length-hint" class="form-text">Empty = practice time</div>
+          <div v-if="showErrors && lengthProblem" id="session-length-error" class="field-error">
+            {{ lengthProblem }}
+          </div>
+        </div>
+        <!-- Meldung zu Datum und Startzeit, unter beiden Feldern -->
+        <div
+          v-if="showErrors && dateProblem"
+          id="session-date-error"
+          class="col-12 field-error mt-1"
+        >
+          {{ dateProblem }}
         </div>
       </div>
 
@@ -378,17 +409,13 @@ async function handleSave() {
             @remove="removeRow(row.key)"
           />
         </div>
+        <div v-if="showErrors && rowsProblem" class="field-error mt-2" role="alert">
+          {{ rowsProblem }}
+        </div>
         <button type="button" class="btn btn-outline-secondary mt-3" @click="addRow">
           + Add rudiment
         </button>
       </fieldset>
-
-      <!-- Probleme aus der eigenen Prüfung, erst nach dem ersten Speichern-Versuch -->
-      <div v-if="showErrors && problems.length > 0" class="alert alert-danger mb-0" role="alert">
-        <ul class="mb-0 ps-3">
-          <li v-for="problem in problems" :key="problem">{{ problem }}</li>
-        </ul>
-      </div>
 
       <!-- Fehler vom Backend, z. B. Server nicht erreichbar -->
       <div v-if="saveError" class="alert alert-danger mb-0" role="alert">{{ saveError }}</div>
@@ -440,6 +467,11 @@ fieldset {
   margin: 0;
   padding: 0;
   border: 0;
+}
+
+.field-error {
+  font-size: var(--dt-font-caption);
+  color: var(--bs-form-invalid-color);
 }
 
 .form-actions {

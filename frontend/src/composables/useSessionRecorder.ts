@@ -9,6 +9,9 @@
 // Der Recorder beobachtet useMetronome per watch. Das Metronom selbst weiß nichts
 // vom Recorder. So bleiben beide Teile unabhängig.
 //
+// Die Aufnahme wird laufend im localStorage gesichert. Lädt jemand die Seite neu
+// oder schließt den Tab aus Versehen, geht die Übezeit nicht verloren.
+//
 // Zeitmessung mit Date.now() in Millisekunden. Für Übezeiten reicht diese Genauigkeit,
 // die Audio-Uhr braucht nur das Metronom selbst.
 
@@ -102,8 +105,73 @@ function startClock() {
   now.value = Date.now()
   clockTimer = window.setInterval(() => {
     now.value = Date.now()
+    // Einmal pro Sekunde sichern, damit auch die laufende Zeit erhalten bleibt
+    saveRecording()
   }, 1000)
 }
+
+// ---------- Sichern und Wiederherstellen (localStorage) ----------
+
+const STORAGE_KEY = 'drumtrainer.recording'
+// Ältere Aufnahmen nicht wiederherstellen. Wer gestern den Tab geschlossen hat,
+// will heute keine 20-Stunden-Session vorfinden.
+const MAX_RESTORE_AGE_MS = 6 * 60 * 60 * 1000
+
+interface StoredRecording {
+  savedAt: number
+  sessionStartedAt: number
+  closedSegments: PlayedRudiment[]
+  // Ohne runningSince: Nach einem Neuladen ist das Metronom ohnehin gestoppt
+  openSegment: { rudimentId: string; bpm: number; playedMs: number } | null
+}
+
+function saveRecording() {
+  try {
+    if (sessionStartedAt.value === null) {
+      localStorage.removeItem(STORAGE_KEY)
+      return
+    }
+    const timestamp = Date.now()
+    const open = openSegment.value
+    const stored: StoredRecording = {
+      savedAt: timestamp,
+      sessionStartedAt: sessionStartedAt.value,
+      closedSegments: closedSegments.value,
+      openSegment:
+        open === null
+          ? null
+          : { rudimentId: open.rudimentId, bpm: open.bpm, playedMs: segmentMs(open, timestamp) },
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(stored))
+  } catch {
+    // localStorage gesperrt oder voll: Aufnahme läuft trotzdem, nur ohne Sicherung
+  }
+}
+
+function restoreRecording() {
+  try {
+    const text = localStorage.getItem(STORAGE_KEY)
+    if (text === null) {
+      return
+    }
+    const stored: StoredRecording = JSON.parse(text)
+    if (Date.now() - stored.savedAt > MAX_RESTORE_AGE_MS) {
+      localStorage.removeItem(STORAGE_KEY)
+      return
+    }
+    sessionStartedAt.value = stored.sessionStartedAt
+    closedSegments.value = stored.closedSegments
+    openSegment.value =
+      stored.openSegment === null ? null : { ...stored.openSegment, runningSince: null }
+    startClock()
+  } catch {
+    // Kaputte Daten: ignorieren und ohne Aufnahme starten
+    localStorage.removeItem(STORAGE_KEY)
+  }
+}
+
+// Beim Laden der App einmal versuchen, eine Aufnahme wiederherzustellen
+restoreRecording()
 
 // ---------- Auf das Metronom reagieren ----------
 
@@ -141,6 +209,7 @@ watch([currentRudimentId, bpm], () => {
   }
   closeOpenSegment()
   openNewSegment()
+  saveRecording()
 })
 
 // ---------- Werte für die Anzeige ----------
@@ -222,6 +291,7 @@ function resetRecording() {
   sessionStartedAt.value = null
   closedSegments.value = []
   openSegment.value = null
+  saveRecording() // entfernt die Sicherung
 }
 
 export function useSessionRecorder() {

@@ -14,9 +14,11 @@ import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
 import ErrorAlert from '@/components/ErrorAlert.vue'
 import EmptyState from '@/components/EmptyState.vue'
+import { useToast } from '@/composables/useToast'
 
 const { loadRudiments } = useRudiments()
 const router = useRouter()
+const { showToast } = useToast()
 
 // Öffnet das Formular zum Nachtragen. Es ersetzt diesen Dialog,
 // "Discard" oder der Zurück-Button führen hierher zurück.
@@ -114,6 +116,7 @@ async function confirmDelete() {
   deleteError.value = ''
   try {
     await deleteSession(session.id)
+    showToast('Session deleted')
     // Lokal aus der Liste entfernen, statt alles neu zu laden
     sessions.value = sessions.value.filter((item) => item.id !== session.id)
     sessionToDelete.value = null

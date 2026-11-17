@@ -15,6 +15,9 @@ import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
 import ErrorAlert from '@/components/ErrorAlert.vue'
 import EmptyState from '@/components/EmptyState.vue'
+import { useToast } from '@/composables/useToast'
+
+const { showToast } = useToast()
 
 function messageOf(error: unknown, fallback: string): string {
   return error instanceof Error ? error.message : fallback
@@ -87,6 +90,7 @@ async function handleAdd() {
     const newFriend = await addFriend(codeInput.value.trim())
     friends.value.push(newFriend)
     codeInput.value = ''
+    showToast(newFriend.name + ' added as friend')
   } catch (error) {
     // Das Backend liefert passende Meldungen für 404 (Code unbekannt)
     // und 409 (schon befreundet, eigener Code)
@@ -117,6 +121,7 @@ async function confirmRemove() {
     await removeFriend(friend.friendCode)
     friends.value = friends.value.filter((item) => item.friendCode !== friend.friendCode)
     friendToRemove.value = null
+    showToast(friend.name + ' removed')
   } catch (error) {
     removeError.value = messageOf(error, 'Could not remove this friend.')
   } finally {

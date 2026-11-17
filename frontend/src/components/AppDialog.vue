@@ -1,3 +1,11 @@
+<script lang="ts">
+// Dieser zweite <script>-Block (ohne setup) läuft nur einmal für alle Dialoge.
+// Der Zähler weiß so, wie viele Dialoge gerade offen sind. Wechselt man direkt
+// von einem Dialog in den nächsten (Leaderboard → Friends), darf das Schließen
+// des alten die Scroll-Sperre nicht aufheben, solange der neue offen ist.
+let openDialogCount = 0
+</script>
+
 <script setup lang="ts">
 // Gemeinsame Hülle für alle Dialoge:
 // dunkler Hintergrund, Fenster in der Mitte, Kopfzeile mit X.
@@ -5,6 +13,7 @@
 // Den eigentlichen Inhalt setzt jeder Dialog über den <slot> ein.
 import { onMounted, onUnmounted, ref, useId } from 'vue'
 import { useCloseDialog } from '@/composables/useCloseDialog'
+import { useFocusTrap } from '@/composables/useFocusTrap'
 import DialogHeader from './DialogHeader.vue'
 
 withDefaults(
@@ -24,6 +33,9 @@ const titleId = useId()
 // ref auf das Fenster-Element im Template (siehe ref="panel" unten)
 const panel = ref<HTMLElement | null>(null)
 
+// Tab bleibt im Dialog, beim Öffnen Fokus ins Fenster, beim Schließen zurück
+useFocusTrap(panel)
+
 function handleKeydown(event: KeyboardEvent) {
   if (event.key === 'Escape') {
     closeDialog()
@@ -33,15 +45,17 @@ function handleKeydown(event: KeyboardEvent) {
 onMounted(() => {
   document.addEventListener('keydown', handleKeydown)
   // Seite dahinter nicht mitscrollen lassen
+  openDialogCount = openDialogCount + 1
   document.body.classList.add('dialog-open')
-  // Fokus ins Fenster setzen, damit die Tastatur direkt im Dialog arbeitet
-  panel.value?.focus()
 })
 
 // Beim Schließen alles wieder aufräumen
 onUnmounted(() => {
   document.removeEventListener('keydown', handleKeydown)
-  document.body.classList.remove('dialog-open')
+  openDialogCount = openDialogCount - 1
+  if (openDialogCount === 0) {
+    document.body.classList.remove('dialog-open')
+  }
 })
 </script>
 

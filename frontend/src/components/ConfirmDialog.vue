@@ -3,6 +3,7 @@
 // Sie liegt ÜBER einem anderen Dialog und hat deshalb keine eigene Route.
 // Die Elternkomponente blendet sie per v-if ein und hört auf confirm und cancel.
 import { onMounted, onUnmounted, ref, useId } from 'vue'
+import { useFocusTrap } from '@/composables/useFocusTrap'
 
 withDefaults(
   defineProps<{
@@ -23,6 +24,11 @@ const emit = defineEmits<{
 
 const titleId = useId()
 const cancelButton = ref<HTMLButtonElement | null>(null)
+const panel = ref<HTMLElement | null>(null)
+
+// Tab bleibt in der Abfrage. Fokus startet auf "Cancel":
+// Ein versehentliches Enter löscht so nichts.
+useFocusTrap(panel, () => cancelButton.value)
 
 // Escape schließt nur diese Abfrage, nicht den Dialog darunter.
 // Der dritte Parameter "true" meldet den Listener für die Capture-Phase an.
@@ -37,8 +43,6 @@ function handleKeydown(event: KeyboardEvent) {
 
 onMounted(() => {
   document.addEventListener('keydown', handleKeydown, true)
-  // Fokus auf "Cancel": Ein versehentliches Enter löscht so nichts
-  cancelButton.value?.focus()
 })
 
 onUnmounted(() => {
@@ -48,7 +52,14 @@ onUnmounted(() => {
 
 <template>
   <div class="confirm-backdrop" @click.self="emit('cancel')">
-    <div class="confirm-panel" role="alertdialog" aria-modal="true" :aria-labelledby="titleId">
+    <div
+      ref="panel"
+      class="confirm-panel"
+      tabindex="-1"
+      role="alertdialog"
+      aria-modal="true"
+      :aria-labelledby="titleId"
+    >
       <h2 :id="titleId" class="confirm-title">{{ title }}</h2>
       <p class="confirm-message">{{ message }}</p>
 

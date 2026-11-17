@@ -7,8 +7,9 @@
 //   1. Zustand (BPM, Takt, Rudiment, Automation)
 //   2. Einfache Funktionen zum Ändern des Zustands
 //   3. Audio: Lookahead-Scheduler nach "A Tale of Two Clocks" (Chris Wilson)
+//   4. Automation (Tempo-Trainer): erhöht das Tempo alle N Takte
 
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { playClick } from '@/audio/clickSound'
 
 // Gleicher Bereich wie im Backend (sessionService.ts)
@@ -34,8 +35,7 @@ const isPlaying = ref(false)
 // id des gewählten Rudiments, null solange noch keins gewählt ist
 const currentRudimentId = ref<string | null>(null)
 
-// Einstellungen der Automation (Tempo-Trainer). Der Tempo-Dialog stellt sie ein,
-// die eigentliche Steigerung des Tempos baut Phase 6.
+// Einstellungen der Automation (Tempo-Trainer). Der Tempo-Dialog stellt sie ein.
 const automation = ref({
   startBpm: 100,
   endBpm: 140,
@@ -43,12 +43,20 @@ const automation = ref({
   everyMeasures: 4,
 })
 
+// Laufende Automation
+const isAutomationRunning = ref(false)
+// Welche Stufe gerade spielt, beginnend bei 1 (= Start-Tempo)
+const automationStep = ref(1)
+// Wie viele ganze Takte in der aktuellen Stufe schon gespielt sind
+const automationMeasuresDone = ref(0)
+
 // ---------------------------------------------------------------------------
 // 2. Zustand ändern
 // ---------------------------------------------------------------------------
 
-// Setzt das Tempo und hält es im erlaubten Bereich
-function setBpm(value: number): void {
+// Setzt das Tempo und hält es im erlaubten Bereich.
+// Nur intern: Die Automation ändert das Tempo hierüber, ohne sich selbst zu beenden.
+function applyBpm(value: number): void {
   let newBpm = Math.round(value)
   if (newBpm < MIN_BPM) {
     newBpm = MIN_BPM
@@ -57,6 +65,13 @@ function setBpm(value: number): void {
     newBpm = MAX_BPM
   }
   bpm.value = newBpm
+}
+
+// Tempo von Hand ändern (Pfeile, Ziehen, Tap Tempo, Tempo-Dialog).
+// Wer selbst eingreift, beendet damit eine laufende Automation.
+function setBpm(value: number): void {
+  stopAutomation()
+  applyBpm(value)
 }
 
 function increaseBpm(): void {
@@ -156,6 +171,13 @@ function scheduleClicks(): void {
       nextBeatInMeasure = 0
     }
 
+    // Taktanfang: Die Automation prüft, ob das Tempo steigen soll.
+    // Das passiert VOR dem Planen dieses Klicks. Das neue Tempo beginnt also
+    // genau auf Schlag 1, und der Abstand zum nächsten Klick nutzt es schon.
+    if (nextBeatInMeasure === 0) {
+      onMeasureStart()
+    }
+
     const oscillator = playClick(audioContext, nextClickTime, nextBeatInMeasure === 0)
     scheduledClicks.push({ beat: nextBeatInMeasure, time: nextClickTime, oscillator })
 
@@ -223,6 +245,8 @@ async function start(): Promise<void> {
 }
 
 function stop(): void {
+  // Ohne laufendes Metronom gibt es nichts zu steigern
+  stopAutomation()
   timerWorker?.postMessage({ command: 'stop' })
 
   if (animationFrameId !== null) {
@@ -253,6 +277,78 @@ function togglePlay(): void {
   }
 }
 
+// ---------------------------------------------------------------------------
+// 4. Automation (Tempo-Trainer)
+// ---------------------------------------------------------------------------
+//
+// Beispiel: Start 160, Ende 190, +5 BPM alle 4 Takte
+//   160 ─4 Takte─► 165 ─4 Takte─► 170 … ─► 190, dann bleibt das Tempo bei 190
+//   Das sind 7 Stufen: 160, 165, 170, 175, 180, 185, 190
+//
+// Gezählt wird im Scheduler, denn nur der weiß, wann ein neuer Takt beginnt.
+
+// Wurde der erste Taktanfang nach dem Start schon gesehen?
+// Startet die Automation mitten im Takt, zählt dieser angebrochene Takt nicht mit.
+let hasSeenFirstDownbeat = false
+
+// Anzahl der Stufen inklusive Start und Ende
+const automationTotalSteps = computed(() => {
+  const { startBpm, endBpm, stepBpm } = automation.value
+  return Math.ceil((endBpm - startBpm) / stepBpm) + 1
+})
+
+const measuresUntilNextStep = computed(
+  () => automation.value.everyMeasures - automationMeasuresDone.value,
+)
+
+// Wird vom Scheduler an jedem Taktanfang aufgerufen
+function onMeasureStart(): void {
+  if (!isAutomationRunning.value) {
+    return
+  }
+  if (!hasSeenFirstDownbeat) {
+    hasSeenFirstDownbeat = true
+    return
+  }
+
+  automationMeasuresDone.value = automationMeasuresDone.value + 1
+  if (automationMeasuresDone.value < automation.value.everyMeasures) {
+    return
+  }
+
+  // Genug Takte gespielt: nächste Stufe, aber nie über das Ziel hinaus
+  automationMeasuresDone.value = 0
+  automationStep.value = automationStep.value + 1
+  const nextBpm = Math.min(bpm.value + automation.value.stepBpm, automation.value.endBpm)
+  applyBpm(nextBpm)
+
+  // Ziel erreicht: Automation endet, das Metronom spielt im Ziel-Tempo weiter
+  if (nextBpm >= automation.value.endBpm) {
+    stopAutomation()
+  }
+}
+
+function startAutomation(): void {
+  const { startBpm, endBpm } = automation.value
+  if (endBpm <= startBpm) {
+    return
+  }
+
+  applyBpm(startBpm)
+  automationStep.value = 1
+  automationMeasuresDone.value = 0
+  hasSeenFirstDownbeat = false
+  isAutomationRunning.value = true
+
+  if (!isPlaying.value) {
+    start()
+  }
+}
+
+function stopAutomation(): void {
+  isAutomationRunning.value = false
+}
+
 export function useMetronome() {
   return {
     bpm,
@@ -262,6 +358,10 @@ export function useMetronome() {
     isPlaying,
     currentRudimentId,
     automation,
+    isAutomationRunning,
+    automationStep,
+    automationTotalSteps,
+    measuresUntilNextStep,
     setBpm,
     increaseBpm,
     decreaseBpm,
@@ -271,6 +371,8 @@ export function useMetronome() {
     start,
     stop,
     togglePlay,
+    startAutomation,
+    stopAutomation,
     selectRudiment,
   }
 }

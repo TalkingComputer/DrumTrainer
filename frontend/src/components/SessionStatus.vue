@@ -7,6 +7,8 @@ import AppIcon from './AppIcon.vue'
 const props = defineProps<{
   sessionSeconds: number
   rudimentCount: number
+  // true, solange das Metronom läuft und Übezeit gezählt wird
+  isRecording: boolean
 }>()
 
 const rudimentText = computed(() => {
@@ -18,7 +20,9 @@ const rudimentText = computed(() => {
 <template>
   <!-- Kein aria-live: Die Zeit ändert sich jede Sekunde, das wäre für Screenreader zu viel -->
   <div class="session-status">
-    <AppIcon name="clock" :size="18" />
+    <!-- Roter Punkt = Aufnahme läuft, Uhr = Session pausiert -->
+    <span v-if="isRecording" class="recording-dot" aria-hidden="true"></span>
+    <AppIcon v-else name="clock" :size="18" />
     <span>
       Session <span class="session-time">{{ formatTimer(sessionSeconds) }}</span>
     </span>
@@ -38,6 +42,14 @@ const rudimentText = computed(() => {
   color: var(--dt-text-muted);
   font-size: var(--dt-font-caption);
   white-space: nowrap;
+}
+
+.recording-dot {
+  width: 0.625rem;
+  height: 0.625rem;
+  margin-inline: 0.25rem;
+  border-radius: 50%;
+  background-color: var(--bs-danger);
 }
 
 .session-time {

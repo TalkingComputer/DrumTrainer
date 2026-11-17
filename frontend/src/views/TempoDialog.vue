@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // Dialog "Tempo" unter /tempo.
 // Oben: BPM, Tap Tempo, Schläge pro Takt. Alles wirkt sofort auf das Metronom.
-// Unten: Einstellungen der Automation. Das Starten baut Phase 6.
+// Unten: Einstellungen der Automation und Start.
 import { computed } from 'vue'
 import { MAX_BEATS, MAX_BPM, MIN_BEATS, MIN_BPM, useMetronome } from '@/composables/useMetronome'
 import { useTapTempo } from '@/composables/useTapTempo'
@@ -19,6 +19,8 @@ const {
   currentBeat,
   beatPulse,
   automation,
+  isAutomationRunning,
+  startAutomation,
   setBpm,
   increaseBpm,
   decreaseBpm,
@@ -47,6 +49,13 @@ const tapLabel = computed(() => {
 })
 
 // ---------- Automation ----------
+// Startet die Automation und schließt den Dialog. Auf dem Übe-Bildschirm
+// zeigt dann AutomationStatus den Fortschritt.
+function handleStartAutomation() {
+  startAutomation()
+  closeDialog()
+}
+
 // Das Ziel muss über dem Start liegen, sonst gibt es nichts zu steigern
 const automationProblem = computed(() => {
   if (automation.value.endBpm <= automation.value.startBpm) {
@@ -149,14 +158,13 @@ const automationProblem = computed(() => {
 
       <div class="dialog-actions">
         <button type="button" class="btn btn-secondary btn-lg" @click="closeDialog">Done</button>
-        <!-- Phase 6: Automation starten. Bis dahin deaktiviert. -->
         <button
           type="button"
           class="btn btn-primary btn-lg"
-          disabled
-          title="Available in a later version"
+          :disabled="automationProblem !== ''"
+          @click="handleStartAutomation"
         >
-          Start automation
+          {{ isAutomationRunning ? 'Restart automation' : 'Start automation' }}
         </button>
       </div>
     </div>
