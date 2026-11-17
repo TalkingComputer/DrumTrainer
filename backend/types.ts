@@ -4,11 +4,11 @@ export interface Player {
   name: string;
 }
 
+// Die Noten eines Rudiments liegen als Bild im Frontend:
+// frontend/public/rudiments/<id>.svg
 export interface Rudiment {
   id: string;
   name: string;
-  pattern: string;       // Notation als Text, z. B. "16R> 16L 16R 16R"
-  beamGroup?: number;    // Balkenlänge in Vierteln. Das ? heißt: Feld darf fehlen
 }
 
 export interface PlayedRudiment {

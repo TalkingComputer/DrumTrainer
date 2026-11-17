@@ -1,88 +1,70 @@
 [
   {
     "id": "single-stroke-roll",
-    "name": "Single Stroke Roll",
-    "pattern": "16R 16L 16R 16L 16R 16L 16R 16L"
+    "name": "Single Stroke Roll"
   },
   {
     "id": "double-stroke-roll",
-    "name": "Double Stroke Roll",
-    "pattern": "16R 16R 16L 16L 16R 16R 16L 16L"
+    "name": "Double Stroke Roll"
   },
   {
     "id": "five-stroke-roll",
-    "name": "Five Stroke Roll",
-    "pattern": "8RR: 8LL: 4R>"
+    "name": "Five Stroke Roll"
   },
   {
     "id": "six-stroke-roll",
-    "name": "Six Stroke Roll",
-    "pattern": "8RR: 8LL: 4R> 4L>"
+    "name": "Six Stroke Roll"
   },
   {
     "id": "seven-stroke-roll",
-    "name": "Seven Stroke Roll",
-    "pattern": "(6 16R 16R 16L 16L 16R 16R) 4L>"
+    "name": "Seven Stroke Roll"
   },
   {
     "id": "nine-stroke-roll",
-    "name": "Nine Stroke Roll",
-    "pattern": "8RR: 8LL: 8RR: 8LL: 4R>"
+    "name": "Nine Stroke Roll"
   },
   {
     "id": "single-stroke-four",
-    "name": "Single Stroke Four",
-    "pattern": "(3 16R 16L 16R) 8L (3 16R 16L 16R) 8L"
+    "name": "Single Stroke Four"
   },
   {
     "id": "single-paradiddle",
-    "name": "Single Paradiddle",
-    "pattern": "16R> 16L 16R 16R 16L> 16R 16L 16L"
+    "name": "Single Paradiddle"
   },
   {
-  "id": "double-paradiddle",
-  "name": "Double Paradiddle",
-  "pattern": "(6 16R> 16L 16R 16L 16R 16R) (6 16L> 16R 16L 16R 16L 16L)"
+    "id": "double-paradiddle",
+    "name": "Double Paradiddle"
   },
   {
-  "id": "triple-paradiddle",
-  "name": "Triple Paradiddle",
-  "pattern": "16R> 16L 16R 16L 16R 16L 16R 16R 16L> 16R 16L 16R 16L 16R 16L 16L"
+    "id": "triple-paradiddle",
+    "name": "Triple Paradiddle"
   },
   {
-  "id": "paradiddle-diddle",
-  "name": "Paradiddle-Diddle",
-  "pattern": "(6 16R> 16L 16R 16R 16L 16L)"
-},
-{
-  "id": "flam",
-  "name": "Flam",
-  "pattern": "4fR"
-},
-{
-  "id": "flam-tap",
-  "name": "Flam Tap",
-  "pattern": "8fR 8R 8fL 8L"
-},
-{
-  "id": "flam-accent",
-  "name": "Flam Accent",
-  "pattern": "8fR> 8L 8R 8fL> 8R 8L",
-  "beamGroup": 1.5
-},
-{
-  "id": "flam-paradiddle",
-  "name": "Flam Paradiddle",
-  "pattern": "8fR> 8L 8R 8R 8fL> 8R 8L 8L"
-},
-{
-  "id": "swiss-army-triplet",
-  "name": "Swiss Army Triplet",
-  "pattern": "(3 8fR> 8R 8L)"
-},
-{
-  "id": "flamacue",
-  "name": "Flamacue",
-  "pattern": "8fR 8L 8R 8fL "
-}
+    "id": "paradiddle-diddle",
+    "name": "Paradiddle-Diddle"
+  },
+  {
+    "id": "flam",
+    "name": "Flam"
+  },
+  {
+    "id": "flam-tap",
+    "name": "Flam Tap"
+  },
+  {
+    "id": "flam-accent",
+    "name": "Flam Accent"
+  },
+  {
+    "id": "flam-paradiddle",
+    "name": "Flam Paradiddle"
+  },
+  {
+    "id": "swiss-army-triplet",
+    "name": "Swiss Army Triplet"
+  },
+  {
+    "id": "flamacue",
+    "name": "Flamacue"
+  }
 ]

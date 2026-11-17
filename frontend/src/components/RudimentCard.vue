@@ -23,11 +23,7 @@ const emit = defineEmits<{
     @click="emit('select', rudiment.id)"
   >
     <span class="card-notation">
-      <RudimentNotation
-        :pattern="rudiment.pattern"
-        :name="rudiment.name"
-        :beam-group="rudiment.beamGroup"
-      />
+      <RudimentNotation :rudiment-id="rudiment.id" :name="rudiment.name" />
     </span>
     <span class="card-name">{{ rudiment.name }}</span>
   </button>
@@ -72,10 +68,6 @@ const emit = defineEmits<{
 .card-notation :deep(.rudiment-notation) {
   width: 100%;
   height: 100%;
-}
-
-.card-notation :deep(svg) {
-  max-height: 100%;
 }
 
 .card-name {

@@ -25,11 +25,7 @@ const emit = defineEmits<{
     @click="emit('select')"
   >
     <div class="notation-card">
-      <RudimentNotation
-        :pattern="rudiment.pattern"
-        :name="rudiment.name"
-        :beam-group="rudiment.beamGroup"
-      />
+      <RudimentNotation :rudiment-id="rudiment.id" :name="rudiment.name" />
     </div>
     <span class="rudiment-name">
       {{ rudiment.name }}

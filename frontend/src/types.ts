@@ -14,11 +14,10 @@ export interface PublicPlayer {
   name: string
 }
 
+// Das Notenbild liegt unter public/rudiments/<id>.svg
 export interface Rudiment {
   id: string
   name: string
-  pattern: string
-  beamGroup?: number
 }
 
 export interface PlayedRudiment {
