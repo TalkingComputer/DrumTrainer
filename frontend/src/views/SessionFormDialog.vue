@@ -1,15 +1,15 @@
 <script setup lang="ts">
-// Ein Formular für zwei Routen:
-//   /sessions/new          → Session nachtragen (leeres Formular)
-//   /sessions/:id/edit     → Session bearbeiten (Formular mit gespeicherten Werten)
-// In Phase 5 füllt der Session-Recorder dieselben Felder nach dem Üben vor
-// ("Session summary").
+// Ein Formular für drei Fälle:
+//   /sessions/new                    → Session nachtragen (leeres Formular)
+//   /sessions/new?source=recording   → "Session summary": Aufnahme vom Üben übernehmen
+//   /sessions/:id/edit               → Session bearbeiten (gespeicherte Werte)
 import { computed, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { createSession, getSession, updateSession } from '@/api/sessions'
 import { MAX_BPM, MIN_BPM, useMetronome } from '@/composables/useMetronome'
 import { useRudiments } from '@/composables/useRudiments'
 import { useCloseDialog } from '@/composables/useCloseDialog'
+import { useSessionRecorder } from '@/composables/useSessionRecorder'
 import {
   combineDateAndTime,
   parseDuration,
@@ -18,12 +18,13 @@ import {
   toTimeInputValue,
 } from '@/utils/duration'
 import { formatTimer } from '@/utils/format'
-import type { SessionInput } from '@/types'
+import type { PlayedRudiment, SessionInput } from '@/types'
 import AppDialog from '@/components/AppDialog.vue'
 import StatTile from '@/components/StatTile.vue'
 import PlayedRudimentRow from '@/components/PlayedRudimentRow.vue'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
 import ErrorAlert from '@/components/ErrorAlert.vue'
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
 
 // Kommt aus der URL /sessions/:sessionId/edit (router: props: true).
 // Fehlt sie, legt das Formular eine neue Session an.
@@ -31,10 +32,24 @@ const props = defineProps<{
   sessionId?: string
 }>()
 
-const isEditMode = computed(() => props.sessionId !== undefined)
-const dialogTitle = computed(() => (isEditMode.value ? 'Edit session' : 'Add past session'))
-
+const route = useRoute()
 const router = useRouter()
+
+const isEditMode = computed(() => props.sessionId !== undefined)
+// Kommt das Formular von "Send Session"? Dann übernimmt es die Aufnahme.
+const isRecordingMode = computed(() => !isEditMode.value && route.query.source === 'recording')
+
+const dialogTitle = computed(() => {
+  if (isEditMode.value) {
+    return 'Edit session'
+  }
+  if (isRecordingMode.value) {
+    return 'Session summary'
+  }
+  return 'Add past session'
+})
+
+const { buildSummary, resetRecording } = useSessionRecorder()
 const { closeDialog } = useCloseDialog()
 const { bpm: metronomeBpm, currentRudimentId } = useMetronome()
 const { rudiments, isLoading: rudimentsLoading, loadRudiments } = useRudiments()
@@ -84,6 +99,25 @@ function removeRow(key: number) {
   rows.value = rows.value.filter((row) => row.key !== key)
 }
 
+// Überträgt fertige Werte in die Formularfelder.
+// Genutzt beim Bearbeiten (gespeicherte Session) und bei der Aufnahme.
+function fillForm(start: Date, durationSeconds: number, playedRudiments: PlayedRudiment[]) {
+  dateText.value = toDateInputValue(start)
+  startTimeText.value = toTimeInputValue(start)
+  sessionLengthText.value = toDurationText(durationSeconds)
+
+  rows.value = []
+  for (const played of playedRudiments) {
+    rows.value.push({
+      key: nextRowKey,
+      rudimentId: played.rudimentId,
+      bpm: played.bpm,
+      durationText: toDurationText(played.durationSeconds),
+    })
+    nextRowKey = nextRowKey + 1
+  }
+}
+
 // ---------- Bestehende Session laden (nur beim Bearbeiten) ----------
 
 const isLoadingSession = ref(false)
@@ -94,23 +128,7 @@ async function loadExistingSession(sessionId: string) {
   loadError.value = ''
   try {
     const session = await getSession(sessionId)
-
-    // Gespeicherte Werte in die Formularfelder übertragen
-    const start = new Date(session.date)
-    dateText.value = toDateInputValue(start)
-    startTimeText.value = toTimeInputValue(start)
-    sessionLengthText.value = toDurationText(session.durationSeconds)
-
-    rows.value = []
-    for (const played of session.playedRudiments) {
-      rows.value.push({
-        key: nextRowKey,
-        rudimentId: played.rudimentId,
-        bpm: played.bpm,
-        durationText: toDurationText(played.durationSeconds),
-      })
-      nextRowKey = nextRowKey + 1
-    }
+    fillForm(new Date(session.date), session.durationSeconds, session.playedRudiments)
   } catch (error) {
     loadError.value = error instanceof Error ? error.message : 'Could not load the session.'
   } finally {
@@ -122,7 +140,15 @@ onMounted(async () => {
   await loadRudiments()
   if (props.sessionId !== undefined) {
     await loadExistingSession(props.sessionId)
-  } else if (rows.value.length === 0) {
+  } else if (isRecordingMode.value) {
+    // Aufnahme übernehmen. Alles bleibt vor dem Speichern korrigierbar.
+    const summary = buildSummary()
+    if (summary !== null) {
+      fillForm(summary.startDate, summary.durationSeconds, summary.playedRudiments)
+    }
+  }
+  // Keine Zeile da (neues Formular oder nur sehr kurz gespielt): eine Startzeile
+  if (rows.value.length === 0) {
     addRow()
   }
 })
@@ -199,6 +225,25 @@ const problems = computed(() => {
   return result
 })
 
+// ---------- Verwerfen ----------
+// Beim Nachtragen und Bearbeiten schließt "Discard" einfach das Formular.
+// Bei einer Aufnahme geht dabei die Übezeit verloren, deshalb vorher nachfragen.
+const isConfirmingDiscard = ref(false)
+
+function handleDiscard() {
+  if (isRecordingMode.value) {
+    isConfirmingDiscard.value = true
+  } else {
+    closeDialog()
+  }
+}
+
+function confirmDiscard() {
+  isConfirmingDiscard.value = false
+  resetRecording()
+  closeDialog()
+}
+
 // ---------- Speichern ----------
 
 const isSaving = ref(false)
@@ -229,6 +274,14 @@ async function handleSave() {
     } else {
       await createSession(input)
     }
+
+    // Aufnahme gespeichert: Recorder leeren, zurück zum Übe-Bildschirm
+    if (isRecordingMode.value) {
+      resetRecording()
+      closeDialog()
+      return
+    }
+
     // Zurück zur Liste. Sie lädt beim Öffnen neu und zeigt die neue Session.
     // Kam man aus der Liste, geht es per back() dorthin zurück (kein doppelter
     // Eintrag im Verlauf). Wurde /sessions/new direkt geöffnet, per replace.
@@ -350,7 +403,7 @@ async function handleSave() {
           type="button"
           class="btn btn-secondary btn-lg"
           :disabled="isSaving"
-          @click="closeDialog"
+          @click="handleDiscard"
         >
           Discard
         </button>
@@ -364,6 +417,15 @@ async function handleSave() {
         </button>
       </div>
     </form>
+
+    <ConfirmDialog
+      v-if="isConfirmingDiscard"
+      title="Discard session?"
+      message="Your recorded practice time will be lost. You cannot undo this."
+      confirm-label="Discard"
+      @confirm="confirmDiscard"
+      @cancel="isConfirmingDiscard = false"
+    />
   </AppDialog>
 </template>
 

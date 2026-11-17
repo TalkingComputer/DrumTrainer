@@ -9,6 +9,8 @@ import { ApiError } from '@/api/client'
 import { MAX_BEATS, MAX_BPM, MIN_BEATS, MIN_BPM, useMetronome } from '@/composables/useMetronome'
 import { useRudiments } from '@/composables/useRudiments'
 import { useTapTempo } from '@/composables/useTapTempo'
+import { useSessionRecorder } from '@/composables/useSessionRecorder'
+import SessionStatus from '@/components/SessionStatus.vue'
 import TopBar from '@/components/TopBar.vue'
 import RudimentDisplay from '@/components/RudimentDisplay.vue'
 import TempoDisplay from '@/components/TempoDisplay.vue'
@@ -138,13 +140,27 @@ function openTempoSettings() {
   router.push({ name: 'tempo' })
 }
 
-// Send Session folgt in Phase 5 mit dem Session-Recorder
-function sendSession() {}
+// ---------- Session-Recorder ----------
+// Der Recorder zeichnet ab dem ersten Play automatisch auf (siehe useSessionRecorder.ts)
+const { hasSession, sessionSeconds, rudimentCount } = useSessionRecorder()
+
+// "Send Session": Metronom anhalten und das vorausgefüllte Formular öffnen.
+// ?source=recording sagt dem Formular, dass es die Aufnahme übernehmen soll.
+function sendSession() {
+  stop()
+  router.push({ name: 'session-new', query: { source: 'recording' } })
+}
 </script>
 
 <template>
   <div class="metronome-page">
-    <TopBar />
+    <TopBar>
+      <SessionStatus
+        v-if="hasSession"
+        :session-seconds="sessionSeconds"
+        :rudiment-count="rudimentCount"
+      />
+    </TopBar>
 
     <main class="metronome-main container">
       <div v-if="rudimentError" class="alert alert-danger" role="alert">
@@ -198,7 +214,7 @@ function sendSession() {}
     <ControlBar
       class="metronome-controls"
       :is-playing="isPlaying"
-      :can-send-session="false"
+      :can-send-session="hasSession"
       @open-leaderboard="openLeaderboard"
       @open-sessions="openSessions"
       @toggle-play="togglePlay"

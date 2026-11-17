@@ -148,6 +148,34 @@
           "durationSeconds": 58
         }
       ]
+    },
+    {
+      "id": "3b0056ee-181b-4101-919d-1c40bb100353",
+      "playerId": "26a485c3-5c55-47a9-822f-a29057ab85b3",
+      "date": "2026-11-17T15:38:00.000Z",
+      "durationSeconds": 125,
+      "playedRudiments": [
+        {
+          "rudimentId": "single-stroke-roll",
+          "bpm": 120,
+          "durationSeconds": 5
+        },
+        {
+          "rudimentId": "single-stroke-roll",
+          "bpm": 177,
+          "durationSeconds": 60
+        },
+        {
+          "rudimentId": "single-stroke-roll",
+          "bpm": 190,
+          "durationSeconds": 16
+        },
+        {
+          "rudimentId": "single-stroke-roll",
+          "bpm": 210,
+          "durationSeconds": 23
+        }
+      ]
     }
   ],
   "friendships": [
