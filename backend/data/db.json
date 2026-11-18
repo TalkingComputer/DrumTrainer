@@ -1,6 +1,165 @@
 {
-  "players": [],
+  "players": [
+    {
+      "id": "33751846-6162-4b79-9209-57f25a265338",
+      "friendCode": "DRUM-2518",
+      "name": "Firefox"
+    },
+    {
+      "id": "164c443f-3693-4eb3-bd1f-cb6ab1fcbb21",
+      "friendCode": "DRUM-6986",
+      "name": "Chrome"
+    },
+    {
+      "id": "4915fa98-1974-43f7-93c4-c912fc72ead2",
+      "friendCode": "DRUM-4915",
+      "name": "Edge"
+    }
+  ],
   "rudiments": [],
-  "sessions": [],
-  "friendships": []
+  "sessions": [
+    {
+      "id": "06241439-16b1-4580-89b8-04236af18cd5",
+      "playerId": "33751846-6162-4b79-9209-57f25a265338",
+      "date": "2026-11-17T21:02:00.000Z",
+      "durationSeconds": 68,
+      "playedRudiments": [
+        {
+          "rudimentId": "six-stroke-roll",
+          "bpm": 170,
+          "durationSeconds": 21
+        },
+        {
+          "rudimentId": "six-stroke-roll",
+          "bpm": 185,
+          "durationSeconds": 34
+        }
+      ]
+    },
+    {
+      "id": "bfa65ce2-6f7f-4071-a028-75423771afc9",
+      "playerId": "33751846-6162-4b79-9209-57f25a265338",
+      "date": "2026-11-17T21:04:00.000Z",
+      "durationSeconds": 21,
+      "playedRudiments": [
+        {
+          "rudimentId": "seven-stroke-roll",
+          "bpm": 111,
+          "durationSeconds": 21
+        }
+      ]
+    },
+    {
+      "id": "7731f5f1-6815-4d24-9d39-c219a115cbac",
+      "playerId": "164c443f-3693-4eb3-bd1f-cb6ab1fcbb21",
+      "date": "2026-11-17T21:05:00.000Z",
+      "durationSeconds": 91,
+      "playedRudiments": [
+        {
+          "rudimentId": "six-stroke-roll",
+          "bpm": 140,
+          "durationSeconds": 32
+        }
+      ]
+    },
+    {
+      "id": "87d48b76-ae3f-4745-920b-e2a8a3c4e245",
+      "playerId": "164c443f-3693-4eb3-bd1f-cb6ab1fcbb21",
+      "date": "2026-11-17T21:07:00.000Z",
+      "durationSeconds": 40,
+      "playedRudiments": [
+        {
+          "rudimentId": "seven-stroke-roll",
+          "bpm": 150,
+          "durationSeconds": 17
+        }
+      ]
+    },
+    {
+      "id": "9d9372f8-d5cd-4a2b-8942-c97c36671822",
+      "playerId": "164c443f-3693-4eb3-bd1f-cb6ab1fcbb21",
+      "date": "2026-11-17T21:08:00.000Z",
+      "durationSeconds": 16,
+      "playedRudiments": [
+        {
+          "rudimentId": "seven-stroke-roll",
+          "bpm": 150,
+          "durationSeconds": 8
+        },
+        {
+          "rudimentId": "seven-stroke-roll",
+          "bpm": 154,
+          "durationSeconds": 8
+        }
+      ]
+    },
+    {
+      "id": "eceb214c-1996-4675-86d9-eb9a56fd6233",
+      "playerId": "164c443f-3693-4eb3-bd1f-cb6ab1fcbb21",
+      "date": "2026-11-17T21:09:00.000Z",
+      "durationSeconds": 37,
+      "playedRudiments": [
+        {
+          "rudimentId": "swiss-army-triplet",
+          "bpm": 165,
+          "durationSeconds": 26
+        }
+      ]
+    },
+    {
+      "id": "29eb2295-4bea-4317-8df7-11ba7de1c9b6",
+      "playerId": "33751846-6162-4b79-9209-57f25a265338",
+      "date": "2026-11-17T21:44:00.000Z",
+      "durationSeconds": 39,
+      "playedRudiments": [
+        {
+          "rudimentId": "single-stroke-roll",
+          "bpm": 185,
+          "durationSeconds": 22
+        },
+        {
+          "rudimentId": "single-stroke-roll",
+          "bpm": 120,
+          "durationSeconds": 13
+        }
+      ]
+    },
+    {
+      "id": "4b955804-e5b8-4eaf-98b0-6946bf253ba6",
+      "playerId": "33751846-6162-4b79-9209-57f25a265338",
+      "date": "2026-11-17T21:49:00.000Z",
+      "durationSeconds": 5,
+      "playedRudiments": [
+        {
+          "rudimentId": "single-stroke-roll",
+          "bpm": 120,
+          "durationSeconds": 5
+        }
+      ]
+    },
+    {
+      "id": "5570afff-b8f9-4d7c-a8a1-c5008e9a96fe",
+      "playerId": "33751846-6162-4b79-9209-57f25a265338",
+      "date": "2026-11-18T15:39:00.000Z",
+      "durationSeconds": 42,
+      "playedRudiments": [
+        {
+          "rudimentId": "swiss-army-triplet",
+          "bpm": 115,
+          "durationSeconds": 21
+        },
+        {
+          "rudimentId": "swiss-army-triplet",
+          "bpm": 148,
+          "durationSeconds": 16
+        }
+      ]
+    }
+  ],
+  "friendships": [
+    {
+      "playerId": "33751846-6162-4b79-9209-57f25a265338",
+      "friendId": "164c443f-3693-4eb3-bd1f-cb6ab1fcbb21"
+    }
+  ]
 }
